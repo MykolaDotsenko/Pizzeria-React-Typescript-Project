@@ -1,13 +1,16 @@
-import React from 'react';
-import './App.css';
+import React from "react";
+import "./App.css";
+import AddPizzaForm from "./components/AddPizzaForm";
 
-
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
-      New App!
+      <div className="wrap">
+        <span className="heading">Our Pizzeria</span>
+      <AddPizzaForm />
+      </div>
     </div>
   );
-}
+};
 
 export default App;
