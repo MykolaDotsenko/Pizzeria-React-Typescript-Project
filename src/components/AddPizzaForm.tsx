@@ -1,35 +1,54 @@
 import React, { FC, ChangeEvent, FormEvent, useState } from "react";
-import './styles.css';
+import Pizza from "../models/Pizza";
+import "./styles.css";
+
+interface AddPizzaFormProps {
+  addPizza: (newPizza: Pizza) => void;
+}
 
 const initState = {
-    title: '',
-    price: '',
-    img: '',
-}
+  title: "",
+  price: "",
+  img: "",
+};
 
-const AddPizzaForm: FC = () => {
-const [newPizza, setNewPizza] = 
-useState<{title:string, price: string, img: string}>(initState)
+const AddPizzaForm: FC<AddPizzaFormProps> = ({ addPizza }) => {
+  const [newPizza, setNewPizza] = useState<{
+    title: string;
+    price: string;
+    img: string;
+  }>(initState);
 
-const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('handle change >> ', e.target);
-    const {name, value} = e.target;
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("handle change >> ", e.target);
+    const { name, value } = e.target;
 
-    setNewPizza ({
-        ...newPizza, 
-        [name] : value
-    })
-}
+    setNewPizza({
+      ...newPizza,
+      [name]: value,
+    });
+  };
 
-const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-    console.log('handle change >> ', e.target);
-}
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-console.log('new pizza');
+    const { title, price, img } = newPizza;
+
+    if (title && price && img) {
+      addPizza({
+        title,
+        img,
+        price: Number(price),
+        id: Date.now(),
+      });
+      setNewPizza(initState);
+    }
+  };
+
+  console.log("new pizza");
 
   return (
-    <form onSubmit ={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <input
         name="title"
         type="text"
