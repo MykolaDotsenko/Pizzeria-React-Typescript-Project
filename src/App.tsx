@@ -1,8 +1,11 @@
-import React from "react";
+import React, {FC, useState} from "react";
 import "./App.css";
 import AddPizzaForm from "./components/AddPizzaForm";
+import Pizza from "./modules/Pizza";
 
-const App: React.FC = () => {
+const App: FC = () => {
+const [pizzasList, setPizzasList] = useState<Pizza[]>([]);
+
   return (
     <div className="App">
       <div className="wrap">
