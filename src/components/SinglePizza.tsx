@@ -33,13 +33,13 @@ const SinglePizza: FC<SinglePizzaProps> = ({ pizza, updatePizza, deletePizza }) 
         <AiFillEdit onClick={handleToggleEdit} />
         <AiFillDelete onClick={handleDelete} />
       </div>
-      {edit ? (
+      {edit && (
         <EditPizzaForm
           data={pizza}
           updatePizza={updatePizza}
           handleToggleEdit={handleToggleEdit}
         />
-      ) : null}
+      )}
     </div>
   );
 };
