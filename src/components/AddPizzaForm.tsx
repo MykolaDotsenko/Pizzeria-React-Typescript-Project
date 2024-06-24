@@ -13,39 +13,21 @@ const initState = {
 };
 
 const AddPizzaForm: FC<AddPizzaFormProps> = ({ addPizza }) => {
-  const [newPizza, setNewPizza] = useState<{
-    title: string;
-    price: string;
-    img: string;
-  }>(initState);
+  const [newPizza, setNewPizza] = useState<{ title: string; price: string; img: string }>(initState);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log("handle change >> ", e.target);
     const { name, value } = e.target;
-
-    setNewPizza({
-      ...newPizza,
-      [name]: value,
-    });
+    setNewPizza({ ...newPizza, [name]: value });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const { title, price, img } = newPizza;
-
     if (title && price && img) {
-      addPizza({
-        title,
-        img,
-        price: Number(price),
-        id: Date.now(),
-      });
+      addPizza({ title, img, price: Number(price), id: Date.now() });
       setNewPizza(initState);
     }
   };
-
-  console.log("new pizza");
 
   return (
     <form onSubmit={handleSubmit}>
@@ -70,7 +52,7 @@ const AddPizzaForm: FC<AddPizzaFormProps> = ({ addPizza }) => {
         onChange={handleChange}
         value={newPizza.img}
       />
-      <button type="submit"> + Add Pizza to menu</button>
+      <button type="submit">+ Add Pizza to menu</button>
     </form>
   );
 };
