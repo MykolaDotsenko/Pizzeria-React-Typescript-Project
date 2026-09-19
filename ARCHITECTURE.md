@@ -2,65 +2,102 @@
 
 ## Goal
 
-Maximize correctness, readability, and change safety for a small client-only application without introducing layers whose maintenance cost exceeds their value.
+Maximize correctness, readability, product realism, and change safety for a small local-first application without introducing infrastructure whose maintenance cost exceeds its value.
 
-## Boundaries
+## Domain
 
-### Domain
+`pizza.ts` owns the stable domain model:
 
-`pizza.ts` owns the stable domain vocabulary: pizza types, identifiers, image choices, currency conversion, and validation schemas.
+- identifiers
+- name and description rules
+- categories
+- money in integer cents
+- preset and uploaded image variants
+- form normalization
+- presentation formatting
 
-Money is represented as integer cents. This avoids floating-point persistence bugs and makes formatting a presentation concern.
+The UI never stores a floating-point price in domain state. Uploaded images are represented explicitly as a discriminated union rather than overloading a filename string.
 
-### State
+## Image boundary
 
-`pizzaReducer.ts` contains pure state transitions. Reducer tests can prove CRUD behavior without React, the DOM, or browser storage.
+`imageProcessing.ts` is the browser-media boundary.
 
-`PizzasProvider.tsx` is the integration boundary between React state and infrastructure. It generates IDs, composes state transitions, persists the exact next snapshot, and dispatches the same action to React.
+Before an uploaded image enters domain state it:
 
-An internal ref tracks the latest committed snapshot synchronously. This matters when two mutations happen in the same event before React has rendered again: the second mutation composes on top of the first rather than persisting stale state.
+1. validates MIME type and source size,
+2. decodes the image,
+3. preserves aspect ratio,
+4. downsizes it through bounded dimensions,
+5. converts it to JPEG,
+6. lowers quality/dimensions until it fits the storage budget,
+7. returns a validated uploaded-image domain value.
 
-### Infrastructure
+This keeps raw multi-megabyte files out of localStorage and makes image persistence deterministic enough for a client-only portfolio application.
+
+## State
+
+`pizzaReducer.ts` contains pure state transitions:
+
+- add
+- update
+- delete
+- restore after Undo
+- drag reorder
+- one-step accessible move
+
+`PizzasProvider.tsx` integrates React with persistence. An authoritative ref advances synchronously before saving and dispatching, so multiple actions in one event compose against the latest snapshot.
+
+Undo keeps only the most recent deletion in transient UI state while restoration itself remains a reducer transition and is persisted normally.
+
+## Persistence
 
 `pizzaRepository.ts` is the only localStorage-aware module.
 
-It validates current records, migrates legacy records, salvages valid rows from partially corrupt payloads, deduplicates identifiers, uses versioned envelopes, and reports write failure without throwing into the UI.
+Storage version 3 adds description, category, and the image discriminated union. The repository migrates:
 
-If storage contains a versioned payload that this application does not understand, the repository preserves it byte-for-byte, blocks writes, and returns seed data as a safe read-only fallback. This prevents an older application build from silently downgrading newer user data.
+- original unversioned arrays,
+- version 1 records,
+- version 2 records.
 
-The repository can be constructed with any `Storage` implementation, which keeps tests deterministic and leaves room for another persistence adapter without changing UI code.
+Legacy preset filenames become explicit preset-image objects and receive safe default descriptions/categories.
 
-### UI
+Unknown future schema versions are never modified. The repository returns seed data in read-only mode so an older build cannot destroy newer data.
 
-The pizza feature owns its forms, cards, pages, and delete confirmation.
+Write failures such as storage quota exhaustion are surfaced through repository writability and the UI persistence warning.
 
-Add and edit use the same `PizzaForm` component so validation, labels, error semantics, and input behavior cannot drift apart.
+## UI
 
-Each delete dialog receives a unique React-generated title id, avoiding duplicate DOM ids while keeping `aria-labelledby` relationships explicit.
+The menu screen is optimized around the operator's primary tasks:
 
-## Why not more layers?
+- create content,
+- find/filter content,
+- reorder it,
+- edit it,
+- remove and recover it.
 
-This app does not need a generic repository base class, a use-case/service layer around three CRUD actions, global state middleware, server-state tooling, dependency injection containers, or a design-system package.
+Desktop drag-and-drop is supplemented by move up/down buttons so ordering remains available to keyboard and mobile users.
 
-Those patterns become valuable at larger scale. Here they would add indirection without reducing meaningful risk.
+Delete uses a non-blocking Undo toast instead of a confirmation modal. This reduces interruption while keeping accidental deletion recoverable.
+
+## Why localStorage for uploaded images?
+
+For a production multi-user system, images belong in object storage/CDN and records belong in a server database.
+
+This project intentionally remains local-first. Resizing and bounding uploaded images provides a realistic photo workflow without adding backend infrastructure that would contribute little additional portfolio signal. Storage quota failures are handled explicitly rather than hidden.
 
 ## Testing strategy
 
-1. Domain tests — schemas and money conversion.
-2. Reducer tests — pure CRUD invariants.
-3. Repository tests — persistence, corruption recovery, migrations, and unknown-version preservation.
-4. Provider tests — same-event mutation composition.
-5. Component tests — user-facing form and accessibility behavior.
-6. Route tests — details/not-found semantics.
-7. Playwright — create/search/navigation, edit/reload/delete, validation, 404s, and future-schema protection across Chromium, Firefox, WebKit, and a mobile Chromium viewport.
+1. domain tests — validation and money normalization,
+2. reducer tests — CRUD, restore, and ordering invariants,
+3. image utility tests — input validation and sizing,
+4. repository tests — v1/v2/v3 persistence, migration, corruption, quota, future schema,
+5. provider tests — same-event mutation composition,
+6. component tests — form validation and upload rejection,
+7. route tests — customer-facing details and safe not-found states,
+8. Playwright browser matrix — customer flow, operator edit/filter/reorder/delete/Undo, validation, image upload/persistence, and future-schema safety.
 
-The CI pipeline treats format, lint, type checking, tests, build, and browser testing as independent gates.
+The browser suite runs in Chromium, Firefox, WebKit, and mobile Chromium.
 
-## Operational decisions
+## Proportionality
 
-- React 19.3 and Vite 8 keep the runtime/build stack current.
-- TypeScript 6 is used until typescript-eslint officially supports TypeScript 7.
-- Node 22.22+ is the minimum because React Router 8 requires it.
-- System fonts remove a render-blocking third-party font dependency.
-- `prefers-reduced-motion` is honored.
-- Image URLs and favicon URLs use Vite's base URL rather than assuming root hosting.
+The app still does not need a service layer, generic repository base class, Redux middleware, command bus, dependency-injection container, backend API, or design-system package. Each current abstraction exists because it removes a concrete failure mode or duplication.

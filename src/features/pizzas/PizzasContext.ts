@@ -7,6 +7,9 @@ export interface PizzasContextValue {
   addPizza: (draft: PizzaDraft) => void;
   updatePizza: (pizza: Pizza) => void;
   deletePizza: (id: string) => void;
+  restorePizza: (pizza: Pizza, index: number) => void;
+  reorderPizza: (sourceId: string, targetId: string) => void;
+  movePizza: (id: string, direction: -1 | 1) => void;
 }
 
 export const PizzasContext = createContext<PizzasContextValue | null>(null);

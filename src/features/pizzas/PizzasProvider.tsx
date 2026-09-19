@@ -37,8 +37,6 @@ export function PizzasProvider({
         return;
       }
 
-      // Advance the authoritative in-memory snapshot synchronously so multiple
-      // actions in the same event are composed instead of reading stale state.
       pizzasRef.current = next;
       setPersistenceError(!repository.save(next));
       dispatch(action);
@@ -70,9 +68,48 @@ export function PizzasProvider({
     [commit],
   );
 
+  const restorePizza = useCallback(
+    (pizza: Pizza, index: number) => {
+      commit({ type: "pizza/restored", pizza, index });
+    },
+    [commit],
+  );
+
+  const reorderPizza = useCallback(
+    (sourceId: string, targetId: string) => {
+      commit({ type: "pizza/reordered", sourceId, targetId });
+    },
+    [commit],
+  );
+
+  const movePizza = useCallback(
+    (id: string, direction: -1 | 1) => {
+      commit({ type: "pizza/moved", id, direction });
+    },
+    [commit],
+  );
+
   const value = useMemo(
-    () => ({ pizzas, persistenceError, addPizza, updatePizza, deletePizza }),
-    [pizzas, persistenceError, addPizza, updatePizza, deletePizza],
+    () => ({
+      pizzas,
+      persistenceError,
+      addPizza,
+      updatePizza,
+      deletePizza,
+      restorePizza,
+      reorderPizza,
+      movePizza,
+    }),
+    [
+      pizzas,
+      persistenceError,
+      addPizza,
+      updatePizza,
+      deletePizza,
+      restorePizza,
+      reorderPizza,
+      movePizza,
+    ],
   );
 
   return <PizzasContext value={value}>{children}</PizzasContext>;

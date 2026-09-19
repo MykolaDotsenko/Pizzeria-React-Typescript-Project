@@ -1,10 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { Pizza } from "./pizza";
+import { createPresetPizzaImage, type Pizza, type PizzaDraft } from "./pizza";
 import { usePizzas } from "./PizzasContext";
 import { PizzasProvider } from "./PizzasProvider";
 import type { PizzaRepository } from "./pizzaRepository";
+
+const createDraft = (name: string, priceCents: number): PizzaDraft => ({
+  name,
+  description: `${name} with a complete menu description.`,
+  category: "classic",
+  priceCents,
+  image: createPresetPizzaImage("pizza-1.jpg"),
+});
 
 function DoubleMutationHarness() {
   const { pizzas, addPizza } = usePizzas();
@@ -15,8 +23,8 @@ function DoubleMutationHarness() {
       <button
         type="button"
         onClick={() => {
-          addPizza({ name: "First", priceCents: 1000, image: "pizza-1.jpg" });
-          addPizza({ name: "Second", priceCents: 1200, image: "pizza-2.jpg" });
+          addPizza(createDraft("First", 1000));
+          addPizza(createDraft("Second", 1200));
         }}
       >
         Add twice

@@ -1,5 +1,10 @@
 import { Link, useParams } from "react-router";
-import { formatPizzaPrice, getPizzaImageUrl, pizzaIdSchema } from "./pizza";
+import {
+  formatPizzaPrice,
+  getPizzaCategoryLabel,
+  getPizzaImageUrl,
+  pizzaIdSchema,
+} from "./pizza";
 import { usePizzas } from "./PizzasContext";
 
 export function PizzaDetailsPage() {
@@ -40,17 +45,18 @@ export function PizzaDetailsPage() {
         </div>
 
         <div className="details-card__content">
-          <span className="eyebrow">House menu</span>
+          <span className="category-chip">{getPizzaCategoryLabel(pizza.category)}</span>
           <h1>{pizza.name}</h1>
           <strong className="details-card__price">
             {formatPizzaPrice(pizza.priceCents)}
           </strong>
-          <p>
-            A focused local-first demo: the same validated pizza record powers this
-            detail view and the editable menu.
-          </p>
+          <p>{pizza.description}</p>
 
           <dl className="details-meta">
+            <div>
+              <dt>Category</dt>
+              <dd>{getPizzaCategoryLabel(pizza.category)}</dd>
+            </div>
             <div>
               <dt>Storage</dt>
               <dd>Browser-local</dd>
