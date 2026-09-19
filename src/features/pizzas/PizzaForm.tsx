@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from "react";
-import { z } from "zod";
+import type { ZodError } from "zod";
 import {
   PIZZA_IMAGE_OPTIONS,
   getPizzaImageUrl,
@@ -11,7 +11,7 @@ import {
 
 interface PizzaFormProps {
   submitLabel: string;
-  onSubmit(draft: PizzaDraft): void;
+  onSubmit: (draft: PizzaDraft) => void;
   initialValues?: PizzaFormValues;
   onCancel?: () => void;
   compact?: boolean;
@@ -27,7 +27,7 @@ const emptyForm: PizzaFormValues = {
   image: "pizza-1.jpg",
 };
 
-function getFieldErrors(error: z.ZodError): FormErrors {
+function getFieldErrors(error: ZodError): FormErrors {
   const errors: FormErrors = {};
 
   for (const issue of error.issues) {
