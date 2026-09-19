@@ -1,74 +1,69 @@
-import React, { FC, ChangeEvent, FormEvent, useState } from "react";
-import Pizza from "../models/Pizza";
+import { useState, type FormEvent } from "react";
 import demoPizzas from "../demoPizzas";
+import { pizzaInputSchema, type PizzaImage, type PizzaInput } from "../models/Pizza";
 import "./styles.css";
 
 interface AddPizzaFormProps {
-  addPizza: (newPizza: Pizza) => void;
+  addPizza: (newPizza: PizzaInput) => void;
 }
 
-const initState = {
-  title: "",
-  price: "",
-  img: demoPizzas[0].img,
-};
+interface PizzaFormState {
+  title: string;
+  price: string;
+  img: PizzaImage;
+}
 
-const AddPizzaForm: FC<AddPizzaFormProps> = ({ addPizza }) => {
-  const [newPizza, setNewPizza] = useState<{
-    title: string;
-    price: string;
-    img: string;
-  }>(initState);
+const initialState: PizzaFormState = { title: "", price: "", img: "pizza-1.jpg" };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+const AddPizzaForm = ({ addPizza }: AddPizzaFormProps) => {
+  const [form, setForm] = useState<PizzaFormState>(initialState);
+  const [error, setError] = useState("");
 
-    setNewPizza({
-      ...newPizza,
-      [name]: value,
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const parsed = pizzaInputSchema.safeParse({
+      title: form.title,
+      price: Number(form.price),
+      img: form.img,
     });
-  };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const { title, price, img } = newPizza;
-
-    if (title && price && img) {
-      addPizza({
-        title,
-        img,
-        price: Number(price),
-        id: Date.now(),
-      });
-      setNewPizza(initState);
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Please check the form.");
+      return;
     }
+
+    addPizza(parsed.data);
+    setForm(initialState);
+    setError("");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="title"
-        type="text"
-        placeholder="Name"
-        onChange={handleChange}
-        value={newPizza.title}
-      />
-      <input
-        name="price"
-        type="text"
-        placeholder="Price"
-        onChange={handleChange}
-        value={newPizza.price}
-      />
-      <select name="img" onChange={handleChange} value={newPizza.img}>
-        {demoPizzas.map((pizza) => (
-          <option key={pizza.id} value={pizza.img}>
-            {pizza.title}
-          </option>
-        ))}
-      </select>
-      <button type="submit">+ Add Pizza to menu</button>
+    <form className="pizza-form" onSubmit={handleSubmit} noValidate>
+      <div className="field">
+        <label htmlFor="pizza-name">Pizza name</label>
+        <input id="pizza-name" name="title" type="text" autoComplete="off" maxLength={80}
+          value={form.title}
+          onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} />
+      </div>
+
+      <div className="field">
+        <label htmlFor="pizza-price">Price (€)</label>
+        <input id="pizza-price" name="price" type="number" min="0.01" max="1000" step="0.01"
+          inputMode="decimal" value={form.price}
+          onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} />
+      </div>
+
+      <div className="field">
+        <label htmlFor="pizza-image">Image</label>
+        <select id="pizza-image" name="img" value={form.img}
+          onChange={(event) => setForm((current) => ({ ...current, img: event.target.value as PizzaImage }))}>
+          {demoPizzas.map((pizza) => <option key={pizza.id} value={pizza.img}>{pizza.title}</option>)}
+        </select>
+      </div>
+
+      {error && <p className="form-error" role="alert">{error}</p>}
+      <button type="submit">+ Add pizza to menu</button>
     </form>
   );
 };

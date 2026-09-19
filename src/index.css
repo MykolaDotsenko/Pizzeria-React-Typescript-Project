@@ -1,12 +1,21 @@
+* { box-sizing: border-box; }
+
+html { color-scheme: light; }
+
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
+  min-width: 320px;
+  background: #fff8f3;
+  color: #241b1b;
+  font-family: "Montserrat", sans-serif;
+  font-size: 18px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 18px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+button, input, select { font: inherit; }
+
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 3px;
 }
