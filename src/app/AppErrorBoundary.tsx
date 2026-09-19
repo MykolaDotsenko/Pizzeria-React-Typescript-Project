@@ -15,7 +15,9 @@ export class AppErrorBoundary extends Component<Props, State> {
     return { hasError: true };
   }
 
-  override componentDidCatch(_error: Error, _info: ErrorInfo): void {
+  override componentDidCatch(error: Error, info: ErrorInfo): void {
+    void error;
+    void info;
     // Production apps would report this boundary to an observability service.
   }
 
