@@ -1,17 +1,8 @@
-import {
-  useCallback,
-  useMemo,
-  useReducer,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
 import { createPizzaId, type Pizza, type PizzaDraft } from "./pizza";
 import { PizzasContext } from "./PizzasContext";
 import { pizzaReducer, type PizzaAction } from "./pizzaReducer";
-import {
-  browserPizzaRepository,
-  type PizzaRepository,
-} from "./pizzaRepository";
+import { browserPizzaRepository, type PizzaRepository } from "./pizzaRepository";
 
 interface PizzasProviderProps {
   children: ReactNode;
@@ -22,10 +13,8 @@ export function PizzasProvider({
   children,
   repository = browserPizzaRepository,
 }: PizzasProviderProps) {
-  const [pizzas, dispatch] = useReducer(
-    pizzaReducer,
-    repository,
-    (pizzaRepository) => pizzaRepository.load(),
+  const [pizzas, dispatch] = useReducer(pizzaReducer, repository, (pizzaRepository) =>
+    pizzaRepository.load(),
   );
   const [persistenceError, setPersistenceError] = useState(false);
 
