@@ -15,7 +15,7 @@ test("core menu flow works end to end", async ({ page }) => {
   await expect(card).toBeVisible();
   await expect(card).toContainText(/14[.,]90/);
 
-  await card.getByRole("link", { name: "Nordic Heat" }).click();
+  await card.getByRole("link", { name: "Nordic Heat", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Nordic Heat" })).toBeVisible();
 
   await page.getByRole("link", { name: /Back to menu/ }).click();
