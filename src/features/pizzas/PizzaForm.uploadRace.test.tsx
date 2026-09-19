@@ -84,9 +84,7 @@ describe("PizzaForm image concurrency", () => {
     },
   );
 
-  it(
-    "does not let a pending upload overwrite a newly selected preset",
-    async () => {
+  it("does not let a pending upload overwrite a newly selected preset", async () => {
       const user = userEvent.setup();
       const pending = deferred<PizzaImage>();
       const uploadedImage: PizzaImage = {
@@ -115,6 +113,5 @@ describe("PizzaForm image concurrency", () => {
         ).toMatch(/images\/pizza-2\.jpg$/);
       });
       expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
-    },
-  );
+  });
 });
