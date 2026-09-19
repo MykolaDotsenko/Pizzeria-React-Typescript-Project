@@ -4,9 +4,9 @@ import type { Pizza, PizzaDraft } from "./pizza";
 export interface PizzasContextValue {
   pizzas: readonly Pizza[];
   persistenceError: boolean;
-  addPizza(draft: PizzaDraft): void;
-  updatePizza(pizza: Pizza): void;
-  deletePizza(id: string): void;
+  addPizza: (draft: PizzaDraft) => void;
+  updatePizza: (pizza: Pizza) => void;
+  deletePizza: (id: string) => void;
 }
 
 export const PizzasContext = createContext<PizzasContextValue | null>(null);
