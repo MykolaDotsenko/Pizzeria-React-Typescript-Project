@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { Pizza } from "./pizza";
 import { usePizzas } from "./PizzasContext";
 import { PizzasProvider } from "./PizzasProvider";
 import type { PizzaRepository } from "./pizzaRepository";
@@ -27,7 +28,7 @@ function DoubleMutationHarness() {
 describe("PizzasProvider", () => {
   it("composes synchronous mutations before persisting", async () => {
     const user = userEvent.setup();
-    const save = vi.fn(() => true);
+    const save = vi.fn<(pizzas: readonly Pizza[]) => boolean>(() => true);
     const repository: PizzaRepository = {
       load: () => [],
       save,
