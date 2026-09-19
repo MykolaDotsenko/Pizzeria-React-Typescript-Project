@@ -28,7 +28,15 @@ jobs:
 
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
-      - run: npm run format:check
+      - id: format
+        run: npm run format:check
+
+      - name: Show formatting diff
+        if: failure() && steps.format.outcome == 'failure'
+        run: |
+          npx prettier --write .
+          git diff --exit-code || true
+
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
