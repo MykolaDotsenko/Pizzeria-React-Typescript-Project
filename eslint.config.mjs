@@ -5,19 +5,28 @@ import { reactRefresh } from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+const typedFiles = ["src/**/*.{ts,tsx}", "e2e/**/*.ts", "*.config.ts"];
+
 export default defineConfig([
   {
     ignores: ["dist/**", "coverage/**", "playwright-report/**", "test-results/**"],
   },
-  js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  reactHooks.configs.flat.recommended,
-  reactRefresh.configs.vite(),
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: ["**/*.{js,mjs,cjs}"],
+    ...js.configs.recommended,
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node,
+    },
+  },
+  {
+    files: typedFiles,
+    extends: [
+      ...tseslint.configs.recommendedTypeChecked,
+      ...tseslint.configs.stylisticTypeChecked,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite(),
+    ],
+    languageOptions: {
       parserOptions: {
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
@@ -32,13 +41,15 @@ export default defineConfig([
     },
   },
   {
-    files: ["e2e/**/*.ts", "*.config.{ts,mjs}"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
-      globals: globals.nodeBuiltin,
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+      globals: globals.browser,
+    },
+  },
+  {
+    files: ["e2e/**/*.ts", "*.config.ts"],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ]);
