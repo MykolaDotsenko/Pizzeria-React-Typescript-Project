@@ -39,8 +39,8 @@ export function DeletePizzaDialog({
       <span className="eyebrow">Remove pizza</span>
       <h2 id="delete-dialog-title">Delete {pizzaName}?</h2>
       <p>
-        This removes the pizza from this browser. You cannot undo this action
-        after leaving the page.
+        This removes the pizza from this browser. You cannot undo this action after
+        leaving the page.
       </p>
       <div className="confirm-dialog__actions">
         <button className="button button--secondary" type="button" onClick={onCancel}>

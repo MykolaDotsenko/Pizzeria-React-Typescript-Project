@@ -1,9 +1,5 @@
 import { Link, useParams } from "react-router";
-import {
-  formatPizzaPrice,
-  getPizzaImageUrl,
-  pizzaIdSchema,
-} from "./pizza";
+import { formatPizzaPrice, getPizzaImageUrl, pizzaIdSchema } from "./pizza";
 import { usePizzas } from "./PizzasContext";
 
 export function PizzaDetailsPage() {
@@ -20,7 +16,9 @@ export function PizzaDetailsPage() {
         <span className="eyebrow">Not found</span>
         <h1>This pizza is no longer on the menu.</h1>
         <p>It may have been deleted or the link may be outdated.</p>
-        <Link className="button button--primary" to="/">Back to menu</Link>
+        <Link className="button button--primary" to="/">
+          Back to menu
+        </Link>
       </section>
     );
   }

@@ -8,9 +8,9 @@ describe("pizzaRepository", () => {
   });
 
   it("uses seed data when storage is empty", () => {
-    expect(
-      createLocalStoragePizzaRepository(window.localStorage).load(),
-    ).toEqual(seedPizzas);
+    expect(createLocalStoragePizzaRepository(window.localStorage).load()).toEqual(
+      seedPizzas,
+    );
   });
 
   it("persists the current versioned model", () => {
@@ -37,15 +37,11 @@ describe("pizzaRepository", () => {
       "pizzasState",
       JSON.stringify({
         version: 1,
-        pizzas: [
-          { id: 7, title: "Legacy Pizza", price: "14.50", img: "pizza-2.jpg" },
-        ],
+        pizzas: [{ id: 7, title: "Legacy Pizza", price: "14.50", img: "pizza-2.jpg" }],
       }),
     );
 
-    expect(
-      createLocalStoragePizzaRepository(window.localStorage).load(),
-    ).toEqual([
+    expect(createLocalStoragePizzaRepository(window.localStorage).load()).toEqual([
       {
         id: "7",
         name: "Legacy Pizza",
@@ -64,9 +60,7 @@ describe("pizzaRepository", () => {
       ]),
     );
 
-    expect(
-      createLocalStoragePizzaRepository(window.localStorage).load(),
-    ).toEqual([
+    expect(createLocalStoragePizzaRepository(window.localStorage).load()).toEqual([
       {
         id: "7",
         name: "Good Pizza",

@@ -32,14 +32,12 @@ describe("pizzaReducer", () => {
 
   it("updates only an existing record", () => {
     const updated = { ...first, priceCents: 999 };
-    expect(
-      pizzaReducer([first], { type: "pizza/updated", pizza: updated }),
-    ).toEqual([updated]);
+    expect(pizzaReducer([first], { type: "pizza/updated", pizza: updated })).toEqual([
+      updated,
+    ]);
   });
 
   it("deletes by id", () => {
-    expect(
-      pizzaReducer([first], { type: "pizza/deleted", id: first.id }),
-    ).toEqual([]);
+    expect(pizzaReducer([first], { type: "pizza/deleted", id: first.id })).toEqual([]);
   });
 });

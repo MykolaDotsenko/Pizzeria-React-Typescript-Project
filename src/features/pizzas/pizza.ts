@@ -44,10 +44,9 @@ export const pizzaSchema = z.object({
 
 export const pizzaListSchema = z
   .array(pizzaSchema)
-  .refine(
-    (pizzas) => new Set(pizzas.map((pizza) => pizza.id)).size === pizzas.length,
-    { error: "Pizza ids must be unique" },
-  );
+  .refine((pizzas) => new Set(pizzas.map((pizza) => pizza.id)).size === pizzas.length, {
+    error: "Pizza ids must be unique",
+  });
 
 const priceInputSchema = z
   .string()

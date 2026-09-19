@@ -53,9 +53,7 @@ export function PizzaForm({
   formId,
 }: PizzaFormProps) {
   const reactId = useId();
-  const [form, setForm] = useState<PizzaFormValues>(
-    initialValues ?? emptyForm,
-  );
+  const [form, setForm] = useState<PizzaFormValues>(initialValues ?? emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const nameId = `${reactId}-name`;
@@ -186,11 +184,7 @@ export function PizzaForm({
           {submitLabel}
         </button>
         {onCancel && (
-          <button
-            className="button button--secondary"
-            type="button"
-            onClick={onCancel}
-          >
+          <button className="button button--secondary" type="button" onClick={onCancel}>
             Cancel
           </button>
         )}

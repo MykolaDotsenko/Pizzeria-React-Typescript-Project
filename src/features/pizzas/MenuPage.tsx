@@ -4,8 +4,7 @@ import { PizzaForm } from "./PizzaForm";
 import { usePizzas } from "./PizzasContext";
 
 export function MenuPage() {
-  const { pizzas, persistenceError, addPizza, updatePizza, deletePizza } =
-    usePizzas();
+  const { pizzas, persistenceError, addPizza, updatePizza, deletePizza } = usePizzas();
   const [query, setQuery] = useState("");
 
   const normalizedQuery = query.trim().toLocaleLowerCase("en");
@@ -22,8 +21,8 @@ export function MenuPage() {
           <span className="eyebrow">Local menu studio</span>
           <h1>Craft a menu that feels ready to serve.</h1>
           <p>
-            Add, refine, and browse your pizzas in a fast local-first workspace.
-            Every change is validated before it reaches persistent state.
+            Add, refine, and browse your pizzas in a fast local-first workspace. Every
+            change is validated before it reaches persistent state.
           </p>
         </div>
 
@@ -86,7 +85,9 @@ export function MenuPage() {
             </div>
           ) : (
             <div className="empty-state">
-              <span className="empty-state__mark" aria-hidden="true">P</span>
+              <span className="empty-state__mark" aria-hidden="true">
+                P
+              </span>
               <h3>{pizzas.length === 0 ? "Your menu is empty" : "No matches"}</h3>
               <p>
                 {pizzas.length === 0

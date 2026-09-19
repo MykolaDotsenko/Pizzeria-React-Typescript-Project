@@ -32,14 +32,8 @@ describe("PizzaForm", () => {
     await user.click(screen.getByRole("button", { name: "Add to menu" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Pizza name")).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
-    expect(screen.getByLabelText("Price (€)")).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
+    expect(screen.getByLabelText("Pizza name")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("Price (€)")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getAllByRole("alert")).toHaveLength(2);
   });
 });

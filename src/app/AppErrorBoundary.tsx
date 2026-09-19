@@ -30,7 +30,8 @@ export class AppErrorBoundary extends Component<Props, State> {
           <span className="eyebrow">Unexpected error</span>
           <h1>Something went wrong.</h1>
           <p>
-            Your saved menu remains in this browser. Reload the application to try again.
+            Your saved menu remains in this browser. Reload the application to try
+            again.
           </p>
           <button
             className="button button--primary"

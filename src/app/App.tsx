@@ -12,7 +12,9 @@ export function App() {
           <header className="site-header">
             <div className="site-header__inner">
               <Link className="brand" to="/" aria-label="Pizzeria Studio home">
-                <span className="brand__mark" aria-hidden="true">P</span>
+                <span className="brand__mark" aria-hidden="true">
+                  P
+                </span>
                 <span>
                   <strong>Pizzeria</strong>
                   <small>Studio</small>

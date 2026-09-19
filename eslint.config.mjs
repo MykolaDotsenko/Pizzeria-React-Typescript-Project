@@ -26,9 +26,9 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/consistent-type-imports": [
         "error",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" }
+        { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
-      "@typescript-eslint/no-confusing-void-expression": "off"
+      "@typescript-eslint/no-confusing-void-expression": "off",
     },
   },
   {

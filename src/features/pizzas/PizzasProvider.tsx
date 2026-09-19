@@ -9,10 +9,7 @@ import {
 import { createPizzaId, type Pizza, type PizzaDraft } from "./pizza";
 import { PizzasContext } from "./PizzasContext";
 import { pizzaReducer } from "./pizzaReducer";
-import {
-  browserPizzaRepository,
-  type PizzaRepository,
-} from "./pizzaRepository";
+import { browserPizzaRepository, type PizzaRepository } from "./pizzaRepository";
 
 interface PizzasProviderProps {
   children: ReactNode;
@@ -23,10 +20,8 @@ export function PizzasProvider({
   children,
   repository = browserPizzaRepository,
 }: PizzasProviderProps) {
-  const [pizzas, dispatch] = useReducer(
-    pizzaReducer,
-    repository,
-    (pizzaRepository) => pizzaRepository.load(),
+  const [pizzas, dispatch] = useReducer(pizzaReducer, repository, (pizzaRepository) =>
+    pizzaRepository.load(),
   );
   const [persistenceError, setPersistenceError] = useState(false);
 
