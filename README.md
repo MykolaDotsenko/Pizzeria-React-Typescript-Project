@@ -21,7 +21,7 @@ A production-minded local-first React application for creating and maintaining a
 
 - React 19.3
 - React Router 8
-- TypeScript 6 in strict mode
+- TypeScript 6.0.x in strict mode (kept within the officially supported `typescript-eslint` range)
 - Vite 8
 - Zod 4
 - Vitest 5 + React Testing Library
@@ -67,7 +67,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for the rationale and trade-offs.
 
 ## Local development
 
-Node.js 22.22+.
+Supported Node.js lines: 22.22.2+, 24.15.0+, or 26+. The range mirrors the strictest runtime requirements of the development toolchain.
 
     npm ci
     npm run dev
