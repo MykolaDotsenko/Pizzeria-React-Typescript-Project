@@ -33,7 +33,23 @@
   text-align: center;
 }
 
+.storage-warning {
+  margin: -12px 0 24px;
+  padding: 12px 14px;
+  border: 1px solid #b45309;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 @media (max-width: 600px) {
-  .app-shell { padding-inline: 12px; }
-  .heading { margin: 24px 0; }
+  .app-shell {
+    padding-inline: 12px;
+  }
+
+  .heading {
+    margin: 24px 0;
+  }
 }

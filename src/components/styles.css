@@ -7,10 +7,19 @@
   background: #fff;
 }
 
-.field { display: grid; gap: 6px; margin-bottom: 15px; }
-.field label { font-size: .9rem; font-weight: 700; }
+.field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 15px;
+}
 
-.pizza-form input, .pizza-form select {
+.field label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.pizza-form input,
+.pizza-form select {
   width: 100%;
   padding: 12px;
   border: 1px solid #b9b3b3;
@@ -18,7 +27,8 @@
   background: #fff;
 }
 
-.pizza-form input:focus, .pizza-form select:focus {
+.pizza-form input:focus,
+.pizza-form select:focus {
   border-color: #b91c1c;
   background: #fff8ed;
 }
@@ -35,12 +45,36 @@
   text-transform: uppercase;
 }
 
-.pizza-form button:hover { background: #991b1b; }
-.pizza-form .secondary-button { background: #e5e7eb; color: #241b1b; }
-.pizza-form .secondary-button:hover { background: #d1d5db; }
-.form-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.form-error { margin: 0 0 15px; color: #991b1b; font-weight: 700; }
-.container { display: grid; gap: 22px; }
+.pizza-form button:hover {
+  background: #991b1b;
+}
+
+.pizza-form .secondary-button {
+  background: #e5e7eb;
+  color: #241b1b;
+}
+
+.pizza-form .secondary-button:hover {
+  background: #d1d5db;
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field-error {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.container {
+  display: grid;
+  gap: 22px;
+}
 
 .pizza {
   position: relative;
@@ -84,8 +118,14 @@
   z-index: 1;
 }
 
-.pizza h2 a { color: inherit; text-decoration: none; }
-.pizza h2 a:hover { text-decoration: underline; }
+.pizza h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pizza h2 a:hover {
+  text-decoration: underline;
+}
 
 .pizza-controls {
   position: absolute;
@@ -108,16 +148,52 @@
   cursor: pointer;
 }
 
-.icon-button svg { width: 22px; height: 22px; }
-.edit-form { margin: 18px 0 0; }
-.pizza-page { align-items: center; gap: 16px; }
-.pizza-page img { width: 100%; max-width: 420px; }
-.pizza-page h2 { width: min(90%, 420px); margin-top: -42px; font-size: clamp(2rem, 9vw, 3.25rem); }
-.pizza-page .price-badge { font-size: clamp(1.5rem, 7vw, 2.5rem); transform: rotate(3deg); }
-.pizza-page p { margin: 0; font-size: 1.2rem; text-align: center; }
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.edit-form {
+  margin: 18px 0 0;
+}
+
+.pizza-page {
+  align-items: center;
+  gap: 16px;
+}
+
+.pizza-page img {
+  width: 100%;
+  max-width: 420px;
+}
+
+.pizza-page h2 {
+  width: min(90%, 420px);
+  margin-top: -42px;
+  font-size: clamp(2rem, 9vw, 3.25rem);
+}
+
+.pizza-page .price-badge {
+  font-size: clamp(1.5rem, 7vw, 2.5rem);
+  transform: rotate(3deg);
+}
+
+.pizza-page p {
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: center;
+}
 
 @media (max-width: 520px) {
-  .pizza-form { padding: 14px; }
-  .form-actions { grid-template-columns: 1fr; }
-  .pizza h2 { margin-inline: 20px; }
+  .pizza-form {
+    padding: 14px;
+  }
+
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pizza h2 {
+    margin-inline: 20px;
+  }
 }
