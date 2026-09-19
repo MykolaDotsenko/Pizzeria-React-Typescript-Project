@@ -38,11 +38,15 @@ export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
 
   return (
     <article className="pizza-card">
-      <Link className="pizza-card__image-link" to={`/pizza/${pizza.id}`}>
+      <Link
+        className="pizza-card__image-link"
+        to={`/pizza/${pizza.id}`}
+        aria-label={`View ${pizza.name} details`}
+      >
         <img
           className="pizza-card__image"
           src={getPizzaImageUrl(pizza.image)}
-          alt={pizza.name}
+          alt=""
           loading="lazy"
           width="640"
           height="480"
