@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
   useReducer,
   useState,
@@ -8,8 +7,11 @@ import {
 } from "react";
 import { createPizzaId, type Pizza, type PizzaDraft } from "./pizza";
 import { PizzasContext } from "./PizzasContext";
-import { pizzaReducer } from "./pizzaReducer";
-import { browserPizzaRepository, type PizzaRepository } from "./pizzaRepository";
+import { pizzaReducer, type PizzaAction } from "./pizzaReducer";
+import {
+  browserPizzaRepository,
+  type PizzaRepository,
+} from "./pizzaRepository";
 
 interface PizzasProviderProps {
   children: ReactNode;
@@ -20,29 +22,50 @@ export function PizzasProvider({
   children,
   repository = browserPizzaRepository,
 }: PizzasProviderProps) {
-  const [pizzas, dispatch] = useReducer(pizzaReducer, repository, (pizzaRepository) =>
-    pizzaRepository.load(),
+  const [pizzas, dispatch] = useReducer(
+    pizzaReducer,
+    repository,
+    (pizzaRepository) => pizzaRepository.load(),
   );
   const [persistenceError, setPersistenceError] = useState(false);
 
-  useEffect(() => {
-    setPersistenceError(!repository.save(pizzas));
-  }, [pizzas, repository]);
+  const commit = useCallback(
+    (action: PizzaAction) => {
+      const next = pizzaReducer(pizzas, action);
 
-  const addPizza = useCallback((draft: PizzaDraft) => {
-    dispatch({
-      type: "pizza/added",
-      pizza: { ...draft, id: createPizzaId() },
-    });
-  }, []);
+      if (next === pizzas) {
+        return;
+      }
 
-  const updatePizza = useCallback((pizza: Pizza) => {
-    dispatch({ type: "pizza/updated", pizza });
-  }, []);
+      setPersistenceError(!repository.save(next));
+      dispatch(action);
+    },
+    [pizzas, repository],
+  );
 
-  const deletePizza = useCallback((id: string) => {
-    dispatch({ type: "pizza/deleted", id });
-  }, []);
+  const addPizza = useCallback(
+    (draft: PizzaDraft) => {
+      commit({
+        type: "pizza/added",
+        pizza: { ...draft, id: createPizzaId() },
+      });
+    },
+    [commit],
+  );
+
+  const updatePizza = useCallback(
+    (pizza: Pizza) => {
+      commit({ type: "pizza/updated", pizza });
+    },
+    [commit],
+  );
+
+  const deletePizza = useCallback(
+    (id: string) => {
+      commit({ type: "pizza/deleted", id });
+    },
+    [commit],
+  );
 
   const value = useMemo(
     () => ({ pizzas, persistenceError, addPizza, updatePizza, deletePizza }),
