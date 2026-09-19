@@ -67,9 +67,7 @@ describe("PizzaForm image concurrency", () => {
         "src",
         firstImage.dataUrl,
       );
-      expect(
-        screen.getByRole("button", { name: "Preparing photo…" }),
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Preparing photo…" })).toBeDisabled();
 
       await act(async () => {
         second.resolve(secondImage);
