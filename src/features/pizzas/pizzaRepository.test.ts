@@ -62,9 +62,10 @@ describe("pizzaRepository", () => {
       image: { kind: "preset", value: "pizza-5.jpg" },
     });
     expect(pizza?.description.length).toBeGreaterThanOrEqual(10);
-    expect(JSON.parse(window.localStorage.getItem("pizzasState") ?? "").version).toBe(
-      3,
+    const stored: unknown = JSON.parse(
+      window.localStorage.getItem("pizzasState") ?? "",
     );
+    expect(stored).toMatchObject({ version: 3 });
   });
 
   it("migrates version 1 money and ids to the current domain model", () => {
