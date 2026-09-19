@@ -29,16 +29,16 @@ The application stays intentionally small, but the failure modes are treated ser
 
 ## Product capabilities
 
-| Workflow | Behavior |
-| --- | --- |
-| Create | Add name, description, category, price, and photo |
-| Edit | Update an existing pizza inline |
-| Discover | Search name/description and filter by category |
-| Organize | Drag cards or use keyboard-accessible move controls |
-| Recover | Delete with a non-blocking Undo action |
-| Persist | Preserve edits, ordering, uploads, and deletions locally |
-| Navigate | Open dedicated pizza-detail routes |
-| Migrate | Upgrade legacy storage schemas through version 3 |
+| Workflow    | Behavior                                                 |
+| ----------- | -------------------------------------------------------- |
+| Create      | Add name, description, category, price, and photo        |
+| Edit        | Update an existing pizza inline                          |
+| Discover    | Search name/description and filter by category           |
+| Organize    | Drag cards or use keyboard-accessible move controls      |
+| Recover     | Delete with a non-blocking Undo action                   |
+| Persist     | Preserve edits, ordering, uploads, and deletions locally |
+| Navigate    | Open dedicated pizza-detail routes                       |
+| Migrate     | Upgrade legacy storage schemas through version 3         |
 | Fail safely | Surface storage failures and protect unknown future data |
 
 ## Responsive product
