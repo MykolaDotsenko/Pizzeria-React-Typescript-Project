@@ -61,6 +61,15 @@ jobs:
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
 
+      - name: Upload portfolio screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: portfolio-screenshots-${{ github.sha }}
+          path: docs/screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v7
