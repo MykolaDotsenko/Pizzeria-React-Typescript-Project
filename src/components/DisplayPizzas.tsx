@@ -1,6 +1,5 @@
-import React, { FC } from "react";
+import type { Pizza } from "../models/Pizza";
 import SinglePizza from "./SinglePizza";
-import Pizza from "../models/Pizza";
 
 interface DisplayPizzasProps {
   pizzasList: Pizza[];
@@ -8,18 +7,17 @@ interface DisplayPizzasProps {
   deletePizza: (id: number) => void;
 }
 
-const DisplayPizzas: FC<DisplayPizzasProps> = ({ pizzasList, updatePizza, deletePizza }) => {
+const DisplayPizzas = ({ pizzasList, updatePizza, deletePizza }: DisplayPizzasProps) => {
+  if (pizzasList.length === 0) {
+    return <p className="empty-state" aria-live="polite">The menu is empty. Add your first pizza above.</p>;
+  }
+
   return (
-    <div className="container">
+    <section className="container" aria-label="Pizza menu">
       {pizzasList.map((pizza) => (
-        <SinglePizza
-          key={pizza.id}
-          pizza={pizza}
-          updatePizza={updatePizza}
-          deletePizza={deletePizza}
-        />
+        <SinglePizza key={pizza.id} pizza={pizza} updatePizza={updatePizza} deletePizza={deletePizza} />
       ))}
-    </div>
+    </section>
   );
 };
 

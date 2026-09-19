@@ -1,39 +1,33 @@
-import React, { FC, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Pizza from "../models/Pizza";
-import demoPizzas from "../demoPizzas";
+import { Link, useParams } from "react-router-dom";
+import { pizzaRepository } from "../data/pizzaRepository";
 
-const PizzaFeature: FC = () => {
+const PizzaFeature = () => {
   const { id } = useParams<{ id: string }>();
-  const [pizza, setPizza] = useState<Pizza | null>(null);
+  const parsedId = Number(id);
+  const pizza = Number.isInteger(parsedId) && parsedId > 0
+    ? pizzaRepository.load().find((item) => item.id === parsedId)
+    : undefined;
 
-  useEffect(() => {
-    const pizzasState = localStorage.getItem("pizzasState");
-    if (pizzasState && id) {
-      const pizzasList = JSON.parse(pizzasState);
-      const searchId = parseInt(id, 10);
-      const currentPizza = pizzasList.find((p: Pizza) => p.id === searchId);
-      setPizza(currentPizza);
-    } else if (id) {
-      const searchId = parseInt(id, 10);
-      const currentPizza = demoPizzas.find((p) => p.id === searchId);
-      setPizza(currentPizza || null);
-    }
-  }, [id]);
+  if (!pizza) {
+    return (
+      <section className="empty-state" aria-live="polite">
+        <h1 className="heading">Pizza not found</h1>
+        <p>This pizza does not exist or has been removed.</p>
+        <Link className="back-link" to="/">Back to menu</Link>
+      </section>
+    );
+  }
 
   return (
     <>
-      <span className="heading">Your Pizza</span>
-      <div className="pizza pizza-page">
-        {pizza && (
-          <>
-            <img src={`/images/${pizza.img}`} alt={pizza.title} />
-            <h2>{pizza.title}</h2>
-            <span>{pizza.price} EURO</span>
-            <p>Best in Turku</p>
-          </>
-        )}
-      </div>
+      <h1 className="heading">Your Pizza</h1>
+      <article className="pizza pizza-page">
+        <img src={"/images/" + pizza.img} alt={pizza.title} />
+        <h2>{pizza.title}</h2>
+        <span className="price-badge">{pizza.price.toFixed(2)} €</span>
+        <p>Best in Turku</p>
+        <Link className="back-link" to="/">Back to menu</Link>
+      </article>
     </>
   );
 };

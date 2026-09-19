@@ -1,11 +1,5 @@
-import React, {FC} from "react";
 import HomeFeature from "../features/HomeFeature";
 
-
-const HomePage: FC = () => {
-    return (
-       <HomeFeature />
-    )
-}
+const HomePage = () => <HomeFeature />;
 
 export default HomePage;

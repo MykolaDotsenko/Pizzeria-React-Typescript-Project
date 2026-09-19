@@ -1,22 +1,20 @@
-import React, { FC } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import PizzaPage from "./pages/PizzaPage";
 import "./App.css";
 
-const App: FC = () => {
-  return (
-    <Router>
-      <div className="App">
-        <div className="wrap">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/pizza/:id" element={<PizzaPage />} />
-          </Routes>
-        </div>
+const App = () => (
+  <BrowserRouter>
+    <main className="app-shell">
+      <div className="wrap">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/pizza/:id" element={<PizzaPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
-    </Router>
-  );
-};
+    </main>
+  </BrowserRouter>
+);
 
 export default App;
