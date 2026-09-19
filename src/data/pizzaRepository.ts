@@ -4,6 +4,14 @@ import { pizzaListSchema, type Pizza } from "../models/Pizza";
 const STORAGE_KEY = "pizzasState";
 const cloneDemoPizzas = (): Pizza[] => demoPizzas.map((pizza) => ({ ...pizza }));
 
+const removeStoredPizzas = () => {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable in restricted browser contexts.
+  }
+};
+
 export const pizzaRepository = {
   load(): Pizza[] {
     if (typeof window === "undefined") return cloneDemoPizzas();
@@ -16,12 +24,13 @@ export const pizzaRepository = {
       const parsedPizzas = pizzaListSchema.safeParse(parsedJson);
 
       if (!parsedPizzas.success) {
-        window.localStorage.removeItem(STORAGE_KEY);
+        removeStoredPizzas();
         return cloneDemoPizzas();
       }
 
       return parsedPizzas.data;
     } catch {
+      removeStoredPizzas();
       return cloneDemoPizzas();
     }
   },
@@ -40,10 +49,6 @@ export const pizzaRepository = {
 
   clear(): void {
     if (typeof window === "undefined") return;
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // Storage can be unavailable in restricted browser contexts.
-    }
+    removeStoredPizzas();
   },
 };
