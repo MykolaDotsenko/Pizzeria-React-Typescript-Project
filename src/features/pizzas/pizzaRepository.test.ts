@@ -121,6 +121,31 @@ describe("pizzaRepository", () => {
     expect(repository.isWritable()).toBe(false);
   });
 
+  it("retries persistence after a transient write failure", () => {
+    const setItem = vi
+      .fn<(key: string, value: string) => void>()
+      .mockImplementationOnce(() => {
+        throw new DOMException("Quota exceeded", "QuotaExceededError");
+      })
+      .mockImplementationOnce(() => undefined);
+    const storage = {
+      getItem: vi.fn(() => null),
+      setItem,
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(() => null),
+      length: 0,
+    } satisfies Storage;
+    const repository = createLocalStoragePizzaRepository(storage);
+
+    expect(repository.save([currentPizza])).toBe(false);
+    expect(repository.isWritable()).toBe(false);
+
+    expect(repository.save([])).toBe(true);
+    expect(repository.isWritable()).toBe(true);
+    expect(setItem).toHaveBeenCalledTimes(2);
+  });
+
   it("preserves unknown-version data and blocks downgrade writes", () => {
     const futureData = JSON.stringify({
       version: 99,
