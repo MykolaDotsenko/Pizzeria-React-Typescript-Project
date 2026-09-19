@@ -25,7 +25,7 @@ test("capture deterministic portfolio screenshots", async ({ page }, testInfo) =
   await page.getByRole("article").last().scrollIntoViewIfNeeded();
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  await expect(page.getByRole("heading", { name: "Craft a menu that feels ready to serve." })).toBeVisible();
+  await expect(\n    page.getByRole("heading", { name: "Craft a menu that feels ready to serve." }),\n  ).toBeVisible();
 
   await page.screenshot({
     path:
