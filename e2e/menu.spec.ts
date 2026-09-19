@@ -28,7 +28,7 @@ test("customer-facing create, category, search, and details flow works", async (
 
   await card.getByRole("link", { name: "Nordic Heat", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Nordic Heat" })).toBeVisible();
-  await expect(page.getByText("Spicy")).toBeVisible();
+  await expect(page.locator(".details-card__content .category-chip")).toHaveText("Spicy");
   await expect(page.getByText(/Smoky pepperoni/)).toBeVisible();
 
   await page.getByRole("link", { name: /Back to menu/ }).click();
@@ -74,7 +74,7 @@ test("operator can edit, filter, reorder, undo delete, and persist changes", asy
   await expect(pepperoniCard).toHaveCount(0);
   await expect(page.getByText("Pepperoni removed.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Undo" }).click();
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
   pepperoniCard = page.getByRole("article").filter({ hasText: "Pepperoni" });
   await expect(pepperoniCard).toBeVisible();
 
