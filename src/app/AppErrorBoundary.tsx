@@ -9,7 +9,7 @@ interface State {
 }
 
 export class AppErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false };
+  override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
