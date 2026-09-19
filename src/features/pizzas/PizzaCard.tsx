@@ -11,8 +11,8 @@ import { PizzaForm } from "./PizzaForm";
 
 interface PizzaCardProps {
   pizza: Pizza;
-  onUpdate(pizza: Pizza): void;
-  onDelete(id: string): void;
+  onUpdate: (pizza: Pizza) => void;
+  onDelete: (id: string) => void;
 }
 
 function EditIcon() {
