@@ -78,7 +78,7 @@ export function PizzaCard({
   return (
     <article
       className="pizza-card"
-      draggable={reorderEnabled}
+      draggable={reorderEnabled && !editing}
       onDragStart={handleDragStart}
       onDragOver={(event) => {
         if (reorderEnabled) {
