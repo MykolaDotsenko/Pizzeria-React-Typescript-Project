@@ -172,7 +172,7 @@ export function createLocalStoragePizzaRepository(
   let storageWritable = storage !== null;
 
   function write(pizzas: readonly Pizza[]): boolean {
-    if (!storage || blockedByUnknownVersion || !storageWritable) {
+    if (!storage || blockedByUnknownVersion) {
       return false;
     }
 
@@ -190,6 +190,7 @@ export function createLocalStoragePizzaRepository(
           pizzas: parsed.data,
         }),
       );
+      storageWritable = true;
       return true;
     } catch {
       storageWritable = false;
