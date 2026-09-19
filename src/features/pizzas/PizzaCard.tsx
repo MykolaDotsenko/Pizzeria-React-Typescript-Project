@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useState, type DragEvent } from "react";
 import { Link } from "react-router";
 import {
   formatPizzaPrice,
+  getPizzaCategoryLabel,
   getPizzaImageUrl,
   pizzaToFormValues,
   type Pizza,
 } from "./pizza";
-import { DeletePizzaDialog } from "./DeletePizzaDialog";
 import { PizzaForm } from "./PizzaForm";
 
 interface PizzaCardProps {
   pizza: Pizza;
+  reorderEnabled: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
   onUpdate: (pizza: Pizza) => void;
-  onDelete: (id: string) => void;
+  onDelete: (pizza: Pizza) => void;
+  onMove: (id: string, direction: -1 | 1) => void;
+  onReorder: (sourceId: string, targetId: string) => void;
 }
 
 function EditIcon() {
@@ -31,13 +36,58 @@ function DeleteIcon() {
   );
 }
 
-export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
+function ArrowIcon({ direction }: { direction: "up" | "down" }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d={direction === "up" ? "m7 14 5-5 5 5H7Z" : "m7 10 5 5 5-5H7Z"} />
+    </svg>
+  );
+}
+
+export function PizzaCard({
+  pizza,
+  reorderEnabled,
+  canMoveUp,
+  canMoveDown,
+  onUpdate,
+  onDelete,
+  onMove,
+  onReorder,
+}: PizzaCardProps) {
   const [editing, setEditing] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const editFormId = `edit-${pizza.id}`;
 
+  function handleDragStart(event: DragEvent<HTMLElement>): void {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", pizza.id);
+  }
+
+  function handleDrop(event: DragEvent<HTMLElement>): void {
+    if (!reorderEnabled) {
+      return;
+    }
+
+    event.preventDefault();
+    const sourceId = event.dataTransfer.getData("text/plain");
+
+    if (sourceId) {
+      onReorder(sourceId, pizza.id);
+    }
+  }
+
   return (
-    <article className="pizza-card">
+    <article
+      className="pizza-card"
+      draggable={reorderEnabled}
+      onDragStart={handleDragStart}
+      onDragOver={(event) => {
+        if (reorderEnabled) {
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+        }
+      }}
+      onDrop={handleDrop}
+    >
       <Link
         className="pizza-card__image-link"
         to={`/pizza/${pizza.id}`}
@@ -56,7 +106,9 @@ export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
       <div className="pizza-card__body">
         <div className="pizza-card__heading">
           <div>
-            <span className="pizza-card__kicker">House menu</span>
+            <span className="category-chip">
+              {getPizzaCategoryLabel(pizza.category)}
+            </span>
             <h3>
               <Link to={`/pizza/${pizza.id}`}>{pizza.name}</Link>
             </h3>
@@ -64,11 +116,33 @@ export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
           <strong className="price-chip">{formatPizzaPrice(pizza.priceCents)}</strong>
         </div>
 
+        <p className="pizza-card__description">{pizza.description}</p>
+
         <div
           className="pizza-card__actions"
           role="group"
           aria-label={`Actions for ${pizza.name}`}
         >
+          <button
+            className="icon-button"
+            type="button"
+            aria-label={`Move ${pizza.name} up`}
+            title="Move up"
+            disabled={!reorderEnabled || !canMoveUp}
+            onClick={() => onMove(pizza.id, -1)}
+          >
+            <ArrowIcon direction="up" />
+          </button>
+          <button
+            className="icon-button"
+            type="button"
+            aria-label={`Move ${pizza.name} down`}
+            title="Move down"
+            disabled={!reorderEnabled || !canMoveDown}
+            onClick={() => onMove(pizza.id, 1)}
+          >
+            <ArrowIcon direction="down" />
+          </button>
           <button
             className="icon-button"
             type="button"
@@ -83,7 +157,7 @@ export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
             className="icon-button icon-button--danger"
             type="button"
             aria-label={`Delete ${pizza.name}`}
-            onClick={() => setConfirmingDelete(true)}
+            onClick={() => onDelete(pizza)}
           >
             <DeleteIcon />
           </button>
@@ -105,16 +179,6 @@ export function PizzaCard({ pizza, onUpdate, onDelete }: PizzaCardProps) {
           </div>
         )}
       </div>
-
-      <DeletePizzaDialog
-        open={confirmingDelete}
-        pizzaName={pizza.name}
-        onCancel={() => setConfirmingDelete(false)}
-        onConfirm={() => {
-          setConfirmingDelete(false);
-          onDelete(pizza.id);
-        }}
-      />
     </article>
   );
 }

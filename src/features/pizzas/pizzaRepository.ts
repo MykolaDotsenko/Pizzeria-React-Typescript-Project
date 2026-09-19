@@ -1,17 +1,20 @@
 import { z } from "zod";
 import {
+  PIZZA_IMAGE_VALUES,
+  createPresetPizzaImage,
   pizzaIdSchema,
-  pizzaImageSchema,
   pizzaListSchema,
   pizzaNameSchema,
   pizzaSchema,
   priceCentsSchema,
   type Pizza,
+  type PizzaCategory,
 } from "./pizza";
 import { seedPizzas } from "./seedPizzas";
 
 const STORAGE_KEY = "pizzasState";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
+const LEGACY_DESCRIPTION = "A house favorite from the local menu.";
 
 const versionMarkerSchema = z.object({
   version: z.number().int(),
@@ -22,10 +25,31 @@ const currentEnvelopeSchema = z.object({
   pizzas: z.unknown(),
 });
 
+const versionTwoEnvelopeSchema = z.object({
+  version: z.literal(2),
+  pizzas: z.unknown(),
+});
+
 const versionOneEnvelopeSchema = z.object({
   version: z.literal(1),
   pizzas: z.unknown(),
 });
+
+const versionTwoPizzaSchema = z
+  .object({
+    id: pizzaIdSchema,
+    name: pizzaNameSchema,
+    priceCents: priceCentsSchema,
+    image: z.enum(PIZZA_IMAGE_VALUES),
+  })
+  .transform(({ id, name, priceCents, image }) => ({
+    id,
+    name,
+    description: LEGACY_DESCRIPTION,
+    category: inferLegacyCategory(name),
+    priceCents,
+    image: createPresetPizzaImage(image),
+  }));
 
 const legacyPriceSchema = z
   .union([z.number(), z.string().trim().min(1)])
@@ -42,13 +66,15 @@ const legacyPizzaSchema = z
       .pipe(pizzaIdSchema),
     title: pizzaNameSchema,
     price: legacyPriceSchema,
-    img: pizzaImageSchema,
+    img: z.enum(PIZZA_IMAGE_VALUES),
   })
   .transform(({ id, title, price, img }) => ({
     id,
     name: title,
+    description: LEGACY_DESCRIPTION,
+    category: inferLegacyCategory(title),
     priceCents: price,
-    image: img,
+    image: createPresetPizzaImage(img),
   }));
 
 export interface PizzaRepository {
@@ -57,8 +83,31 @@ export interface PizzaRepository {
   isWritable(): boolean;
 }
 
+function inferLegacyCategory(name: string): PizzaCategory {
+  const normalized = name.toLocaleLowerCase("en");
+
+  if (
+    normalized.includes("veg") ||
+    normalized.includes("margherita") ||
+    normalized.includes("margarita") ||
+    normalized.includes("cheese")
+  ) {
+    return "vegetarian";
+  }
+
+  if (
+    normalized.includes("spicy") ||
+    normalized.includes("hot") ||
+    normalized.includes("diavola")
+  ) {
+    return "spicy";
+  }
+
+  return "classic";
+}
+
 function cloneSeedPizzas(): Pizza[] {
-  return seedPizzas.map((pizza) => ({ ...pizza }));
+  return seedPizzas.map((pizza) => ({ ...pizza, image: { ...pizza.image } }));
 }
 
 function normalizeCurrentPizzas(value: unknown): Pizza[] | null {
@@ -87,7 +136,10 @@ function normalizeCurrentPizzas(value: unknown): Pizza[] | null {
   return pizzas.length > 0 ? pizzas : null;
 }
 
-function migrateLegacyPizzas(value: unknown): Pizza[] | null {
+function migrateWithSchema(
+  value: unknown,
+  schema: typeof versionTwoPizzaSchema | typeof legacyPizzaSchema,
+): Pizza[] | null {
   if (!Array.isArray(value)) {
     return null;
   }
@@ -100,7 +152,7 @@ function migrateLegacyPizzas(value: unknown): Pizza[] | null {
   const seenIds = new Set<string>();
 
   for (const item of value) {
-    const parsed = legacyPizzaSchema.safeParse(item);
+    const parsed = schema.safeParse(item);
 
     if (!parsed.success || seenIds.has(parsed.data.id)) {
       continue;
@@ -116,10 +168,11 @@ function migrateLegacyPizzas(value: unknown): Pizza[] | null {
 export function createLocalStoragePizzaRepository(
   storage: Storage | null,
 ): PizzaRepository {
-  let writable = storage !== null;
+  let blockedByUnknownVersion = false;
+  let storageWritable = storage !== null;
 
   function write(pizzas: readonly Pizza[]): boolean {
-    if (!storage || !writable) {
+    if (!storage || blockedByUnknownVersion || !storageWritable) {
       return false;
     }
 
@@ -139,7 +192,7 @@ export function createLocalStoragePizzaRepository(
       );
       return true;
     } catch {
-      writable = false;
+      storageWritable = false;
       return false;
     }
   }
@@ -152,13 +205,14 @@ export function createLocalStoragePizzaRepository(
     try {
       storage.removeItem(STORAGE_KEY);
     } catch {
-      writable = false;
+      storageWritable = false;
     }
   }
 
   return {
     load(): readonly Pizza[] {
-      writable = storage !== null;
+      blockedByUnknownVersion = false;
+      storageWritable = storage !== null;
 
       if (!storage) {
         return cloneSeedPizzas();
@@ -176,12 +230,9 @@ export function createLocalStoragePizzaRepository(
 
         if (
           versionMarker.success &&
-          versionMarker.data.version !== 1 &&
-          versionMarker.data.version !== STORAGE_VERSION
+          ![1, 2, STORAGE_VERSION].includes(versionMarker.data.version)
         ) {
-          // Never downgrade or overwrite data written by a schema this version
-          // does not understand. The UI remains usable in a read-only fallback.
-          writable = false;
+          blockedByUnknownVersion = true;
           return cloneSeedPizzas();
         }
 
@@ -202,11 +253,28 @@ export function createLocalStoragePizzaRepository(
           return normalized;
         }
 
+        const versionTwoEnvelope = versionTwoEnvelopeSchema.safeParse(json);
+
+        if (versionTwoEnvelope.success) {
+          const migrated = migrateWithSchema(
+            versionTwoEnvelope.data.pizzas,
+            versionTwoPizzaSchema,
+          );
+
+          if (migrated === null) {
+            remove();
+            return cloneSeedPizzas();
+          }
+
+          write(migrated);
+          return migrated;
+        }
+
         const versionOneEnvelope = versionOneEnvelopeSchema.safeParse(json);
         const legacySource = versionOneEnvelope.success
           ? versionOneEnvelope.data.pizzas
           : json;
-        const migrated = migrateLegacyPizzas(legacySource);
+        const migrated = migrateWithSchema(legacySource, legacyPizzaSchema);
 
         if (migrated === null) {
           remove();
@@ -226,7 +294,7 @@ export function createLocalStoragePizzaRepository(
     },
 
     isWritable(): boolean {
-      return writable;
+      return storage !== null && storageWritable && !blockedByUnknownVersion;
     },
   };
 }

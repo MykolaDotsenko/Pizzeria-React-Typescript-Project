@@ -4,9 +4,18 @@ A production-minded local-first React application for creating and maintaining a
 
 **Canonical demo:** https://pizza-react-typescript.vercel.app
 
-## Why this project exists
+## Product capabilities
 
-The original 2024 learning project was deliberately modernized rather than replaced. The current version demonstrates how a small application can use production-grade boundaries without carrying enterprise-scale complexity.
+- create and edit pizzas with validated name, description, category, price, and photo
+- choose a preset photo or upload a JPG/PNG/WebP image
+- uploaded photos are resized and converted to compact JPEG data locally in the browser
+- search by name or description
+- filter by category
+- reorder the menu with drag-and-drop or accessible move up/down controls
+- delete with a non-blocking Undo action
+- persist menu order, edits, uploaded photos, and deletions locally
+- dedicated pizza detail routes
+- safe schema migrations from the original app through storage version 3
 
 ## Current stack
 
@@ -22,86 +31,80 @@ The original 2024 learning project was deliberately modernized rather than repla
 - GitHub Actions CI
 - Vercel SPA deployment
 
-TypeScript 6 is intentional: the lint toolchain officially supports TypeScript versions below 6.1, so this repository prioritizes a fully supported toolchain over adopting TypeScript 7 before the surrounding ecosystem declares support.
-
 ## Architecture
 
-The app uses one vertical feature slice for the pizza domain:
+The app intentionally stays a compact vertical feature slice:
 
     src/
       app/
-        App.tsx
-        AppErrorBoundary.tsx
-        NotFoundPage.tsx
       features/pizzas/
         pizza.ts
         seedPizzas.ts
+        imageProcessing.ts
         pizzaRepository.ts
         pizzaReducer.ts
         PizzasContext.ts
         PizzasProvider.tsx
         PizzaForm.tsx
         PizzaCard.tsx
-        DeletePizzaDialog.tsx
         MenuPage.tsx
         PizzaDetailsPage.tsx
       test/
-        setup.ts
 
 Core rules:
 
-1. **Domain data is trusted only after validation.** Zod guards forms and persisted storage.
-2. **Money is stored as integer cents.** UI strings never become floating-point domain money.
-3. **State transitions are pure.** CRUD behavior lives in a reducer; persistence is an external side effect.
-4. **Persistence is behind an adapter.** UI code never reads or writes localStorage.
-5. **Migrations preserve user data.** Old unversioned and v1 records migrate to the current v2 model.
-6. **Unknown schema versions are never overwritten.** The app falls back to a read-only seed view and surfaces a persistence warning instead of downgrading future data.
-7. **Synchronous mutations compose safely.** The provider advances an authoritative in-memory snapshot before persistence and reducer dispatch.
-8. **The architecture stays proportional.** There is no service layer, command bus, or generic repository abstraction without a real use case.
+1. **Domain data is validated at boundaries.**
+2. **Money is stored as integer cents.**
+3. **State transitions are pure reducer operations.**
+4. **Persistence is isolated behind one repository adapter.**
+5. **Images are processed locally before persistence.**
+6. **Old schemas migrate forward; unknown future schemas are never overwritten.**
+7. **Same-event mutations compose against one authoritative in-memory snapshot.**
+8. **Reordering and Undo are domain transitions, not ad-hoc UI state mutations.**
+9. **The architecture remains proportional to the size of the application.**
 
-More detail is in [ARCHITECTURE.md](./ARCHITECTURE.md).
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the rationale and trade-offs.
 
-## Quality gates
+## Local development
 
-Install with a reproducible lockfile:
+Node.js 22.22+.
 
     npm ci
-
-Run locally:
-
     npm run dev
 
-Run deterministic quality checks:
+Quality checks:
 
     npm run check
 
-Run browser tests:
+Browser tests:
 
     npx playwright install chromium firefox webkit
     npm run test:e2e
 
-Every pull request runs formatting, typed linting, strict type checking, unit/component tests, a production build, and the browser matrix.
-
 ## Persistence
 
-The current browser format is version 2:
+The current storage envelope is version 3. A pizza contains:
 
     {
-      "version": 2,
-      "pizzas": [
-        {
-          "id": "uuid-or-legacy-id",
-          "name": "Pepperoni",
-          "priceCents": 1290,
-          "image": "pizza-1.jpg"
-        }
-      ]
+      "id": "uuid-or-legacy-id",
+      "name": "Pepperoni",
+      "description": "Tomato, mozzarella, pepperoni, and oregano.",
+      "category": "classic",
+      "priceCents": 1290,
+      "image": {
+        "kind": "preset",
+        "value": "pizza-1.jpg"
+      }
     }
 
-The repository migrates the original array format and version 1 records, including legacy string prices. Corrupt legacy records are isolated instead of making the whole application crash. Unknown versioned payloads are preserved untouched and make persistence read-only until the data is handled by a compatible application version.
+Uploaded images use the same image field with `kind: "uploaded"` and a locally optimized JPEG data URL.
+
+Storage versions 1 and 2 migrate forward to version 3. Corrupt individual records are isolated where possible. Unknown future versions are preserved byte-for-byte and the application switches persistence to read-only fallback mode instead of downgrading the data.
+
+## Product scope
+
+This is deliberately a **local-first portfolio application**, not a POS or multi-user restaurant SaaS. Its product features are chosen to demonstrate realistic menu-management UX while keeping infrastructure proportional: there is no account system, remote database, CDN, payments, or multi-device synchronization.
 
 ## Deployment
 
-Vercel is the canonical deployment. `vercel.json` rewrites SPA routes to the application shell so deep links such as `/pizza/1` resolve correctly.
-
-For repository hygiene, GitHub Pages should remain disabled unless a dedicated Vite Pages workflow is intentionally added.
+Vercel is the canonical deployment. `vercel.json` rewrites SPA routes to the application shell so direct routes such as `/pizza/1` resolve correctly.
