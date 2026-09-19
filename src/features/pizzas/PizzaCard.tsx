@@ -63,7 +63,7 @@ export function PizzaCard({
   }
 
   function handleDrop(event: DragEvent<HTMLElement>): void {
-    if (!reorderEnabled) {
+    if (!reorderEnabled || editing) {
       return;
     }
 
@@ -78,10 +78,10 @@ export function PizzaCard({
   return (
     <article
       className="pizza-card"
-      draggable={reorderEnabled}
+      draggable={reorderEnabled && !editing}
       onDragStart={handleDragStart}
       onDragOver={(event) => {
-        if (reorderEnabled) {
+        if (reorderEnabled && !editing) {
           event.preventDefault();
           event.dataTransfer.dropEffect = "move";
         }

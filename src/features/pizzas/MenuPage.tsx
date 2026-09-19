@@ -84,23 +84,38 @@ export function MenuPage() {
       return;
     }
 
-    const source = pizzas.find((pizza) => pizza.id === sourceId);
-    const target = pizzas.find((pizza) => pizza.id === targetId);
+    const sourceIndex = pizzas.findIndex((pizza) => pizza.id === sourceId);
+    const targetIndex = pizzas.findIndex((pizza) => pizza.id === targetId);
 
+    if (sourceIndex < 0 || targetIndex < 0) {
+      return;
+    }
+
+    const source = pizzas[sourceIndex];
     reorderPizza(sourceId, targetId);
 
-    if (source && target) {
-      setReorderAnnouncement(`${source.name} moved to the position of ${target.name}.`);
+    if (source) {
+      setReorderAnnouncement(
+        `${source.name} moved to position ${targetIndex + 1} of ${pizzas.length}.`,
+      );
     }
   }
 
   function handleMove(id: string, direction: -1 | 1): void {
-    const pizza = pizzas.find((item) => item.id === id);
+    const fromIndex = pizzas.findIndex((item) => item.id === id);
+    const toIndex = fromIndex + direction;
 
+    if (fromIndex < 0 || toIndex < 0 || toIndex >= pizzas.length) {
+      return;
+    }
+
+    const pizza = pizzas[fromIndex];
     movePizza(id, direction);
 
     if (pizza) {
-      setReorderAnnouncement(`${pizza.name} moved ${direction < 0 ? "up" : "down"}.`);
+      setReorderAnnouncement(
+        `${pizza.name} moved to position ${toIndex + 1} of ${pizzas.length}.`,
+      );
     }
   }
 

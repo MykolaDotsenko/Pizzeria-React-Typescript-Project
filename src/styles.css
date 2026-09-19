@@ -380,14 +380,6 @@ img {
   gap: 12px;
 }
 
-.pizza-card__kicker {
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .pizza-card h3 {
   margin: 5px 0 0;
   font-size: 1.18rem;
@@ -568,14 +560,6 @@ img {
 .button--secondary:hover {
   background: #f5efea;
 }
-.button--danger {
-  background: var(--danger);
-  color: #fff;
-}
-.button--danger:hover {
-  background: #7d2323;
-}
-
 .empty-state {
   min-height: 320px;
   display: grid;
@@ -605,39 +589,6 @@ img {
 .empty-state p {
   margin: 7px 0 0;
   font-size: 0.9rem;
-}
-
-.confirm-dialog {
-  width: min(calc(100% - 32px), 430px);
-  padding: 24px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface-strong);
-  color: var(--text);
-  box-shadow: 0 30px 100px rgb(30 20 15 / 30%);
-}
-
-.confirm-dialog::backdrop {
-  background: rgb(32 23 19 / 48%);
-  backdrop-filter: blur(3px);
-}
-
-.confirm-dialog h2 {
-  margin: 0;
-  font-size: 1.55rem;
-  letter-spacing: -0.035em;
-}
-
-.confirm-dialog p {
-  margin: 11px 0 20px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.confirm-dialog__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
 }
 
 .details-page {
@@ -828,11 +779,9 @@ img {
   .details-meta {
     grid-template-columns: 1fr;
   }
-  .confirm-dialog__actions,
   .pizza-form__actions {
     flex-direction: column-reverse;
   }
-  .confirm-dialog__actions .button,
   .pizza-form__actions .button {
     width: 100%;
   }

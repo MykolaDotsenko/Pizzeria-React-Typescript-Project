@@ -1,4 +1,4 @@
-import { useId, useState, type ChangeEvent, type FormEvent } from "react";
+import { useId, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import type { ZodError } from "zod";
 import { processPizzaImage } from "./imageProcessing";
 import {
@@ -64,6 +64,7 @@ export function PizzaForm({
   formId,
 }: PizzaFormProps) {
   const reactId = useId();
+  const uploadRequestId = useRef(0);
   const [form, setForm] = useState<PizzaFormValues>(initialValues ?? createEmptyForm());
   const [errors, setErrors] = useState<FormErrors>({});
   const [uploadError, setUploadError] = useState("");
@@ -75,6 +76,9 @@ export function PizzaForm({
   const categoryId = `${reactId}-category`;
   const presetImageId = `${reactId}-preset-image`;
   const uploadId = `${reactId}-upload`;
+  const imageHintId = `${reactId}-image-hint`;
+  const imageErrorId = `${reactId}-image-error`;
+  const uploadErrorId = `${reactId}-upload-error`;
 
   function clearError(field: FormField): void {
     setErrors((current) => {
@@ -96,20 +100,32 @@ export function PizzaForm({
       return;
     }
 
+    const requestId = ++uploadRequestId.current;
+    input.value = "";
     setProcessingImage(true);
     setUploadError("");
 
     try {
       const image = await processPizzaImage(file);
+
+      if (requestId !== uploadRequestId.current) {
+        return;
+      }
+
       clearError("image");
       setForm((current) => ({ ...current, image }));
     } catch (error) {
+      if (requestId !== uploadRequestId.current) {
+        return;
+      }
+
       setUploadError(
         error instanceof Error ? error.message : "Could not process this image.",
       );
     } finally {
-      setProcessingImage(false);
-      input.value = "";
+      if (requestId === uploadRequestId.current) {
+        setProcessingImage(false);
+      }
     }
   }
 
@@ -135,6 +151,14 @@ export function PizzaForm({
       setForm(createEmptyForm());
     }
   }
+
+  const uploadDescribedBy = [
+    imageHintId,
+    uploadError ? uploadErrorId : null,
+    errors.image ? imageErrorId : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <form
@@ -256,7 +280,7 @@ export function PizzaForm({
         </div>
       </div>
 
-      <fieldset className="photo-fieldset">
+      <fieldset className="photo-fieldset" aria-busy={processingImage}>
         <legend>Photo</legend>
 
         <div className="pizza-form__row">
@@ -265,6 +289,8 @@ export function PizzaForm({
             <select
               id={presetImageId}
               value={form.image.kind === "preset" ? form.image.value : ""}
+              aria-invalid={Boolean(errors.image)}
+              aria-describedby={errors.image ? imageErrorId : imageHintId}
               onChange={(event) => {
                 const value = event.target.value;
 
@@ -277,6 +303,8 @@ export function PizzaForm({
                 );
 
                 if (preset) {
+                  uploadRequestId.current += 1;
+                  setProcessingImage(false);
                   setUploadError("");
                   clearError("image");
                   setForm((current) => ({
@@ -303,22 +331,28 @@ export function PizzaForm({
               id={uploadId}
               type="file"
               accept="image/jpeg,image/png,image/webp"
+              aria-invalid={Boolean(uploadError || errors.image)}
+              aria-describedby={uploadDescribedBy}
               onChange={(event) => void handleImageUpload(event)}
             />
           </div>
         </div>
 
-        <p className="field__hint">
+        <p id={imageHintId} className="field__hint">
           JPG, PNG, or WebP up to 8 MB. Photos are resized and optimized locally.
         </p>
-        {processingImage && <p className="field__status">Optimizing photo…</p>}
+        {processingImage && (
+          <p className="field__status" role="status" aria-live="polite">
+            Optimizing photo…
+          </p>
+        )}
         {uploadError && (
-          <p className="field__error" role="alert">
+          <p id={uploadErrorId} className="field__error" role="alert">
             {uploadError}
           </p>
         )}
         {errors.image && (
-          <p className="field__error" role="alert">
+          <p id={imageErrorId} className="field__error" role="alert">
             {errors.image}
           </p>
         )}
