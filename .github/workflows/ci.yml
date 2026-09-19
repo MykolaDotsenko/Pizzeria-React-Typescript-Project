@@ -8,19 +8,26 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Quality gates
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 10
 
-      - uses: actions/setup-node@v4
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
 
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
@@ -31,10 +38,12 @@ jobs:
     name: Browser matrix
     needs: quality
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 15
 
-      - uses: actions/setup-node@v4
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -43,3 +52,14 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-diagnostics
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
