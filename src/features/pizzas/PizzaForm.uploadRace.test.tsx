@@ -84,37 +84,34 @@ describe("PizzaForm image concurrency", () => {
     },
   );
 
-  it(
-    "does not let a pending upload overwrite a newly selected preset",
-    async () => {
-      const user = userEvent.setup();
-      const pending = deferred<PizzaImage>();
-      const uploadedImage: PizzaImage = {
-        kind: "uploaded",
-        dataUrl: "data:image/jpeg;base64,U1RBTEU=",
-      };
+  it("does not let a pending upload overwrite a newly selected preset", async () => {
+    const user = userEvent.setup();
+    const pending = deferred<PizzaImage>();
+    const uploadedImage: PizzaImage = {
+      kind: "uploaded",
+      dataUrl: "data:image/jpeg;base64,U1RBTEU=",
+    };
 
-      processPizzaImageMock.mockReturnValueOnce(pending.promise);
+    processPizzaImageMock.mockReturnValueOnce(pending.promise);
 
-      render(<PizzaForm submitLabel="Add to menu" onSubmit={vi.fn()} />);
+    render(<PizzaForm submitLabel="Add to menu" onSubmit={vi.fn()} />);
 
-      await user.upload(
-        screen.getByLabelText("Upload own photo"),
-        new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
-      );
-      await user.selectOptions(screen.getByLabelText("Preset photo"), "pizza-2.jpg");
+    await user.upload(
+      screen.getByLabelText("Upload own photo"),
+      new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
+    );
+    await user.selectOptions(screen.getByLabelText("Preset photo"), "pizza-2.jpg");
 
-      await act(async () => {
-        pending.resolve(uploadedImage);
-        await pending.promise;
-      });
+    await act(async () => {
+      pending.resolve(uploadedImage);
+      await pending.promise;
+    });
 
-      await waitFor(() => {
-        expect(
-          screen.getByAltText("Pizza photo preview").getAttribute("src"),
-        ).toMatch(/images\/pizza-2\.jpg$/);
-      });
-      expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
-    },
-  );
+    await waitFor(() => {
+      expect(
+        screen.getByAltText("Pizza photo preview").getAttribute("src"),
+      ).toMatch(/images\/pizza-2\.jpg$/);
+    });
+    expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
+  });
 });
