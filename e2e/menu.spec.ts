@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-async function addNordicHeat(page: import("@playwright/test").Page) {
+async function addNordicHeat(page: Page) {
   await page.getByLabel("Pizza name").fill("Nordic Heat");
   await page
     .getByLabel("Description")
