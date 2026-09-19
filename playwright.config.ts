@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
-  workers: isCi ? 1 : undefined,
+  ...(isCi ? { workers: 1 } : {}),
   reporter: isCi ? "github" : "list",
   use: {
     baseURL: "http://127.0.0.1:4173",
