@@ -1,20 +1,24 @@
 import { z } from "zod";
 
-export const PIZZA_IMAGE_OPTIONS = [
-  { value: "pizza-1.jpg", label: "Pepperoni" },
-  { value: "pizza-2.jpg", label: "Margherita" },
-  { value: "pizza-3.jpg", label: "Sausage" },
-  { value: "pizza-4.jpg", label: "Four cheese" },
-  { value: "pizza-5.jpg", label: "Vegetable" },
-  { value: "pizza-6.jpg", label: "Mixed" },
+export const PIZZA_IMAGE_VALUES = [
+  "pizza-1.jpg",
+  "pizza-2.jpg",
+  "pizza-3.jpg",
+  "pizza-4.jpg",
+  "pizza-5.jpg",
+  "pizza-6.jpg",
 ] as const;
 
-const imageNames = PIZZA_IMAGE_OPTIONS.map((option) => option.value) as [
-  string,
-  ...string[],
-];
+export const PIZZA_IMAGE_OPTIONS = [
+  { value: PIZZA_IMAGE_VALUES[0], label: "Pepperoni" },
+  { value: PIZZA_IMAGE_VALUES[1], label: "Margherita" },
+  { value: PIZZA_IMAGE_VALUES[2], label: "Sausage" },
+  { value: PIZZA_IMAGE_VALUES[3], label: "Four cheese" },
+  { value: PIZZA_IMAGE_VALUES[4], label: "Vegetable" },
+  { value: PIZZA_IMAGE_VALUES[5], label: "Mixed" },
+] as const;
 
-export const pizzaImageSchema = z.enum(imageNames);
+export const pizzaImageSchema = z.enum(PIZZA_IMAGE_VALUES);
 
 export const pizzaIdSchema = z
   .string()

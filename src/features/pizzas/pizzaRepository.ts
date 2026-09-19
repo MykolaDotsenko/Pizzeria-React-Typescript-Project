@@ -13,6 +13,10 @@ import { seedPizzas } from "./seedPizzas";
 const STORAGE_KEY = "pizzasState";
 const STORAGE_VERSION = 2;
 
+const versionMarkerSchema = z.object({
+  version: z.number().int(),
+});
+
 const currentEnvelopeSchema = z.object({
   version: z.literal(STORAGE_VERSION),
   pizzas: z.unknown(),
@@ -50,6 +54,7 @@ const legacyPizzaSchema = z
 export interface PizzaRepository {
   load(): readonly Pizza[];
   save(pizzas: readonly Pizza[]): boolean;
+  isWritable(): boolean;
 }
 
 function cloneSeedPizzas(): Pizza[] {
@@ -111,8 +116,10 @@ function migrateLegacyPizzas(value: unknown): Pizza[] | null {
 export function createLocalStoragePizzaRepository(
   storage: Storage | null,
 ): PizzaRepository {
+  let writable = storage !== null;
+
   function write(pizzas: readonly Pizza[]): boolean {
-    if (!storage) {
+    if (!storage || !writable) {
       return false;
     }
 
@@ -132,6 +139,7 @@ export function createLocalStoragePizzaRepository(
       );
       return true;
     } catch {
+      writable = false;
       return false;
     }
   }
@@ -144,12 +152,14 @@ export function createLocalStoragePizzaRepository(
     try {
       storage.removeItem(STORAGE_KEY);
     } catch {
-      // Storage can be unavailable in privacy-restricted browser contexts.
+      writable = false;
     }
   }
 
   return {
     load(): readonly Pizza[] {
+      writable = storage !== null;
+
       if (!storage) {
         return cloneSeedPizzas();
       }
@@ -162,6 +172,19 @@ export function createLocalStoragePizzaRepository(
         }
 
         const json: unknown = JSON.parse(raw);
+        const versionMarker = versionMarkerSchema.safeParse(json);
+
+        if (
+          versionMarker.success &&
+          versionMarker.data.version !== 1 &&
+          versionMarker.data.version !== STORAGE_VERSION
+        ) {
+          // Never downgrade or overwrite data written by a schema this version
+          // does not understand. The UI remains usable in a read-only fallback.
+          writable = false;
+          return cloneSeedPizzas();
+        }
+
         const currentEnvelope = currentEnvelopeSchema.safeParse(json);
 
         if (currentEnvelope.success) {
@@ -200,6 +223,10 @@ export function createLocalStoragePizzaRepository(
 
     save(pizzas: readonly Pizza[]): boolean {
       return write(pizzas);
+    },
+
+    isWritable(): boolean {
+      return writable;
     },
   };
 }

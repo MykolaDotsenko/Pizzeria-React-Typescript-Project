@@ -1,4 +1,11 @@
-import { useCallback, useMemo, useReducer, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { createPizzaId, type Pizza, type PizzaDraft } from "./pizza";
 import { PizzasContext } from "./PizzasContext";
 import { pizzaReducer, type PizzaAction } from "./pizzaReducer";
@@ -16,20 +23,27 @@ export function PizzasProvider({
   const [pizzas, dispatch] = useReducer(pizzaReducer, repository, (pizzaRepository) =>
     pizzaRepository.load(),
   );
-  const [persistenceError, setPersistenceError] = useState(false);
+  const pizzasRef = useRef(pizzas);
+  const [persistenceError, setPersistenceError] = useState(
+    () => !repository.isWritable(),
+  );
 
   const commit = useCallback(
     (action: PizzaAction) => {
-      const next = pizzaReducer(pizzas, action);
+      const current = pizzasRef.current;
+      const next = pizzaReducer(current, action);
 
-      if (next === pizzas) {
+      if (next === current) {
         return;
       }
 
+      // Advance the authoritative in-memory snapshot synchronously so multiple
+      // actions in the same event are composed instead of reading stale state.
+      pizzasRef.current = next;
       setPersistenceError(!repository.save(next));
       dispatch(action);
     },
-    [pizzas, repository],
+    [repository],
   );
 
   const addPizza = useCallback(
