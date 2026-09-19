@@ -3,8 +3,8 @@ import { useEffect, useRef } from "react";
 interface DeletePizzaDialogProps {
   open: boolean;
   pizzaName: string;
-  onCancel(): void;
-  onConfirm(): void;
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 
 export function DeletePizzaDialog({
