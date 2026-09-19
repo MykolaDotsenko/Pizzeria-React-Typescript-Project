@@ -1,61 +1,105 @@
-# Pizzeria — React + TypeScript
+# Pizzeria Studio
 
-A small, production-minded single-page application for managing a pizzeria menu.
+A production-minded local-first React application for creating and maintaining a small pizzeria menu.
 
-Live demo: https://pizza-react-typescript.vercel.app
+**Canonical demo:** https://pizza-react-typescript.vercel.app
 
-## Features
+## Why this project exists
 
-- View, add, edit, and delete pizzas
-- Dedicated pizza detail routes
-- Local persistence behind a versioned repository boundary
-- Runtime validation and legacy-data migration with Zod
-- Safe recovery from corrupt or partially invalid browser storage
-- Keyboard-accessible edit and delete controls
-- Field-level accessible validation errors
-- Responsive mobile and desktop layout
-- Automated unit and component tests
-- CI checks for type safety, tests, and production build
+The original 2024 learning project was deliberately modernized rather than replaced. The current version demonstrates how a small application can use production-grade boundaries without carrying enterprise-scale complexity.
 
-## Tech stack
+## Current stack
 
-React 18, TypeScript strict mode, React Router, Zod, Vite, Vitest, React Testing Library, GitHub Actions, and Vercel.
+- React 19.3
+- React Router 8
+- TypeScript 6 in strict mode
+- Vite 8
+- Zod 4
+- Vitest 5 + React Testing Library
+- Playwright end-to-end smoke tests
+- ESLint flat config + typed linting
+- Prettier
+- GitHub Actions CI
+- Vercel SPA deployment
+
+TypeScript 6 is intentional: the lint toolchain officially supports TypeScript versions below 6.1, so this repository prioritizes a fully supported toolchain over adopting TypeScript 7 before the surrounding ecosystem declares support.
 
 ## Architecture
 
-Application pizza state lives in a provider above the router, so list and detail pages read the same in-memory source of truth. React state updater functions remain pure; persistence is performed in an effect.
+The app uses one vertical feature slice for the pizza domain:
 
-The UI does not read or write localStorage directly. pizzaRepository owns persistence, validates stored data, migrates the original unversioned 2024 format, converts legacy string prices, removes unrecoverable records, deduplicates ids, and writes a versioned storage envelope.
+    src/
+      app/
+        App.tsx
+        AppErrorBoundary.tsx
+        NotFoundPage.tsx
+      features/pizzas/
+        pizza.ts
+        seedPizzas.ts
+        pizzaRepository.ts
+        pizzaReducer.ts
+        PizzasContext.ts
+        PizzasProvider.tsx
+        PizzaForm.tsx
+        PizzaCard.tsx
+        DeletePizzaDialog.tsx
+        MenuPage.tsx
+        PizzaDetailsPage.tsx
+      test/
+        setup.ts
 
-## Data safety
+Core rules:
 
-Pizza has one runtime schema and TypeScript types are derived from that schema. Prices must be between €0.01 and €1000 and may have at most two decimal places.
+1. **Domain data is trusted only after validation.** Zod guards forms and persisted storage.
+2. **Money is stored as integer cents.** UI strings never become floating-point domain money.
+3. **State transitions are pure.** CRUD behavior lives in a reducer; persistence is an external side effect.
+4. **Persistence is behind an adapter.** UI code never reads or writes localStorage.
+5. **Migrations preserve user data.** Old unversioned and v1 records migrate to the current v2 model.
+6. **The architecture stays proportional.** There is no service layer, command bus, or generic repository abstraction without a real use case.
 
-If stored JSON is corrupted or contains no recoverable pizzas, the app safely falls back to the demo menu. If only some legacy records are invalid, valid records are preserved.
+More detail is in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-If browser storage cannot be written, the app stays usable but clearly warns that changes are temporary instead of silently pretending they were saved.
+## Quality gates
 
-## Local development
+Install with a reproducible lockfile:
 
-Node.js 20+.
+    npm ci
 
-    npm install
+Run locally:
+
     npm run dev
 
-Quality checks:
-
-    npm run typecheck
-    npm test
-    npm run build
-
-Run everything:
+Run deterministic quality checks:
 
     npm run check
 
+Run browser tests:
+
+    npx playwright install chromium
+    npm run test:e2e
+
+Every pull request runs formatting, linting, strict type checking, unit/component tests, a production build, and a Chromium end-to-end smoke flow.
+
+## Persistence
+
+The current browser format is version 2:
+
+    {
+      "version": 2,
+      "pizzas": [
+        {
+          "id": "uuid-or-legacy-id",
+          "name": "Pepperoni",
+          "priceCents": 1290,
+          "image": "pizza-1.jpg"
+        }
+      ]
+    }
+
+The repository migrates the original array format and version 1 records, including legacy string prices. Corrupt records are isolated instead of making the whole application crash.
+
 ## Deployment
 
-The canonical deployment is configured for Vercel with an SPA rewrite so direct navigation to routes such as /pizza/2 works correctly.
+Vercel is the canonical deployment. `vercel.json` rewrites SPA routes to the application shell so deep links such as `/pizza/1` resolve correctly.
 
-## History
-
-This project started as a Create React App learning exercise in 2024. It was later modernized to Vite with runtime validation, versioned persistence, migration support, tests, accessibility improvements, responsive styling, CI, and safer routing.
+The repository's legacy GitHub Pages setting may still publish repository source via Jekyll. It should be disabled in repository settings unless a dedicated Vite Pages workflow is configured.
