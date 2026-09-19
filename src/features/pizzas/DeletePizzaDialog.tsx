@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 interface DeletePizzaDialogProps {
   open: boolean;
@@ -14,6 +14,7 @@ export function DeletePizzaDialog({
   onConfirm,
 }: DeletePizzaDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -33,11 +34,11 @@ export function DeletePizzaDialog({
     <dialog
       ref={dialogRef}
       className="confirm-dialog"
-      aria-labelledby="delete-dialog-title"
+      aria-labelledby={titleId}
       onCancel={onCancel}
     >
       <span className="eyebrow">Remove pizza</span>
-      <h2 id="delete-dialog-title">Delete {pizzaName}?</h2>
+      <h2 id={titleId}>Delete {pizzaName}?</h2>
       <p>
         This removes the pizza from this browser. You cannot undo this action after
         leaving the page.

@@ -16,7 +16,7 @@ The original 2024 learning project was deliberately modernized rather than repla
 - Vite 8
 - Zod 4
 - Vitest 5 + React Testing Library
-- Playwright end-to-end smoke tests
+- Playwright browser matrix: Chromium, Firefox, WebKit, and mobile Chromium
 - ESLint flat config + typed linting
 - Prettier
 - GitHub Actions CI
@@ -55,7 +55,9 @@ Core rules:
 3. **State transitions are pure.** CRUD behavior lives in a reducer; persistence is an external side effect.
 4. **Persistence is behind an adapter.** UI code never reads or writes localStorage.
 5. **Migrations preserve user data.** Old unversioned and v1 records migrate to the current v2 model.
-6. **The architecture stays proportional.** There is no service layer, command bus, or generic repository abstraction without a real use case.
+6. **Unknown schema versions are never overwritten.** The app falls back to a read-only seed view and surfaces a persistence warning instead of downgrading future data.
+7. **Synchronous mutations compose safely.** The provider advances an authoritative in-memory snapshot before persistence and reducer dispatch.
+8. **The architecture stays proportional.** There is no service layer, command bus, or generic repository abstraction without a real use case.
 
 More detail is in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
@@ -75,10 +77,10 @@ Run deterministic quality checks:
 
 Run browser tests:
 
-    npx playwright install chromium
+    npx playwright install chromium firefox webkit
     npm run test:e2e
 
-Every pull request runs formatting, linting, strict type checking, unit/component tests, a production build, and a Chromium end-to-end smoke flow.
+Every pull request runs formatting, typed linting, strict type checking, unit/component tests, a production build, and the browser matrix.
 
 ## Persistence
 
@@ -96,10 +98,10 @@ The current browser format is version 2:
       ]
     }
 
-The repository migrates the original array format and version 1 records, including legacy string prices. Corrupt records are isolated instead of making the whole application crash.
+The repository migrates the original array format and version 1 records, including legacy string prices. Corrupt legacy records are isolated instead of making the whole application crash. Unknown versioned payloads are preserved untouched and make persistence read-only until the data is handled by a compatible application version.
 
 ## Deployment
 
 Vercel is the canonical deployment. `vercel.json` rewrites SPA routes to the application shell so deep links such as `/pizza/1` resolve correctly.
 
-The repository's legacy GitHub Pages setting may still publish repository source via Jekyll. It should be disabled in repository settings unless a dedicated Vite Pages workflow is configured.
+For repository hygiene, GitHub Pages should remain disabled unless a dedicated Vite Pages workflow is intentionally added.

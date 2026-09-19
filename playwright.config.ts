@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: isCi,
-  retries: isCi ? 2 : 0,
+  retries: isCi ? 1 : 0,
   ...(isCi ? { workers: 1 } : {}),
   reporter: isCi ? "github" : "list",
   use: {
@@ -18,6 +18,18 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "mobile-chromium",
+      use: { ...devices["Pixel 7"] },
     },
   ],
   webServer: {

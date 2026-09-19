@@ -82,6 +82,25 @@ describe("pizzaRepository", () => {
     const repository = createLocalStoragePizzaRepository(null);
 
     expect(repository.load()).toEqual(seedPizzas);
+    expect(repository.isWritable()).toBe(false);
     expect(repository.save(seedPizzas)).toBe(false);
+  });
+
+  it("preserves unknown-version data and blocks downgrade writes", () => {
+    const futureData = JSON.stringify({
+      version: 99,
+      pizzas: [
+        { id: "future", name: "Future Pizza", priceCents: 900, image: "pizza-1.jpg" },
+      ],
+      futureField: "must-survive",
+    });
+    window.localStorage.setItem("pizzasState", futureData);
+
+    const repository = createLocalStoragePizzaRepository(window.localStorage);
+
+    expect(repository.load()).toEqual(seedPizzas);
+    expect(repository.isWritable()).toBe(false);
+    expect(repository.save(seedPizzas)).toBe(false);
+    expect(window.localStorage.getItem("pizzasState")).toBe(futureData);
   });
 });

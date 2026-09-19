@@ -28,7 +28,7 @@ jobs:
       - run: npm run build
 
   e2e:
-    name: Browser smoke test
+    name: Browser matrix
     needs: quality
     runs-on: ubuntu-latest
     steps:
@@ -41,5 +41,5 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:e2e
