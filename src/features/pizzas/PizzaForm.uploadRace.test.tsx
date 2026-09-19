@@ -107,10 +107,9 @@ describe("PizzaForm image concurrency", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByAltText("Pizza photo preview")).toHaveAttribute(
-        "src",
-        expect.stringMatching(/images\/pizza-2\.jpg$/),
-      );
+      expect(
+        screen.getByAltText("Pizza photo preview").getAttribute("src"),
+      ).toMatch(/images\/pizza-2\.jpg$/);
     });
     expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
   });
