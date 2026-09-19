@@ -82,9 +82,7 @@ describe("PizzaForm image concurrency", () => {
           secondImage.dataUrl,
         );
       });
-      expect(
-        screen.getByRole("button", { name: "Add to menu" }),
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
     },
   );
 
@@ -106,10 +104,7 @@ describe("PizzaForm image concurrency", () => {
         screen.getByLabelText("Upload own photo"),
         new File(["photo"], "photo.jpg", { type: "image/jpeg" }),
       );
-      await user.selectOptions(
-        screen.getByLabelText("Preset photo"),
-        "pizza-2.jpg",
-      );
+      await user.selectOptions(screen.getByLabelText("Preset photo"), "pizza-2.jpg");
 
       await act(async () => {
         pending.resolve(uploadedImage);
@@ -121,9 +116,7 @@ describe("PizzaForm image concurrency", () => {
           screen.getByAltText("Pizza photo preview").getAttribute("src"),
         ).toMatch(/images\/pizza-2\.jpg$/);
       });
-      expect(
-        screen.getByRole("button", { name: "Add to menu" }),
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Add to menu" })).toBeEnabled();
     },
   );
 });
